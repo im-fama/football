@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: fa-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+  ml-service:
+    build: ./ml-service
+    container_name: fa-ml-service
+    ports:
+      - "5001:5001"
+    restart: unless-stopped
+
+  server:
+    build: ./server
+    container_name: fa-server
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      CLIENT_ORIGIN: http://localhost:5173
+      MONGO_URI: mongodb://mongo:27017/football_analytics
+      SPORTSDB_BASE_URL: https://www.thesportsdb.com/api/v1/json
+      SPORTSDB_API_KEY: "123"
+      ML_SERVICE_URL: http://ml-service:5001
+      CACHE_TTL_MINUTES: 360
+    depends_on:
+      - mongo
+      - ml-service
+    restart: unless-stopped
+
+  client:
+    build: ./client
+    container_name: fa-client
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
