@@ -1,0 +1,93 @@
+[
+  {
+    "sourceId": "133612",
+    "leagueSourceId": "4328",
+    "name": "Chelsea",
+    "badgeUrl": "https://www.thesportsdb.com/images/media/team/badge/yvwvtu1448811130.png",
+    "stadium": "Stamford Bridge"
+  },
+  {
+    "sourceId": "133604",
+    "leagueSourceId": "4328",
+    "name": "Arsenal",
+    "badgeUrl": "https://www.thesportsdb.com/images/media/team/badge/vxvyuy1420655483.png",
+    "stadium": "Emirates Stadium"
+  },
+  {
+    "sourceId": "133613",
+    "leagueSourceId": "4328",
+    "name": "Manchester City",
+    "badgeUrl": "https://www.thesportsdb.com/images/media/team/badge/vwpvry1470404461.png",
+    "stadium": "Etihad Stadium"
+  },
+  {
+    "sourceId": "133614",
+    "leagueSourceId": "4328",
+    "name": "Manchester United",
+    "badgeUrl": "https://www.thesportsdb.com/images/media/team/badge/tqrsyt1448813134.png",
+    "stadium": "Old Trafford"
+  },
+  {
+    "sourceId": "133739",
+    "leagueSourceId": "4335",
+    "name": "Real Madrid",
+    "badgeUrl": "https://www.thesportsdb.com/images/media/team/badge/v75yxg1556019553.png",
+    "stadium": "Santiago Bernabeu"
+  },
+  {
+    "sourceId": "133738",
+    "leagueSourceId": "4335",
+    "name": "Barcelona",
+    "badgeUrl": "https://www.thesportsdb.com/images/media/team/badge/0205uz1576767576.png",
+    "stadium": "Camp Nou"
+  },
+  {
+    "sourceId": "133857",
+    "leagueSourceId": "4332",
+    "name": "Torino",
+    "badgeUrl": "https://www.thesportsdb.com/images/media/team/badge/vxxryy1424103138.png",
+    "stadium": "Stadio Olimpico Grande Torino"
+  },
+  {
+    "sourceId": "133843",
+    "leagueSourceId": "4332",
+    "name": "Juventus",
+    "badgeUrl": "https://www.thesportsdb.com/images/media/team/badge/5uupv21683401569.png",
+    "stadium": "Allianz Stadium"
+  },
+  {
+    "sourceId": "133821",
+    "leagueSourceId": "4332",
+    "name": "AC Milan",
+    "badgeUrl": "https://www.thesportsdb.com/images/media/team/badge/vxvywu1420658797.png",
+    "stadium": "San Siro"
+  },
+  {
+    "sourceId": "133839",
+    "leagueSourceId": "4332",
+    "name": "Inter",
+    "badgeUrl": "https://www.thesportsdb.com/images/media/team/badge/7178u81617189123.png",
+    "stadium": "San Siro"
+  },
+  {
+    "sourceId": "133664",
+    "leagueSourceId": "4331",
+    "name": "Bayern Munich",
+    "badgeUrl": "https://www.thesportsdb.com/images/media/team/badge/b944201625906232.png",
+    "stadium": "Allianz Arena"
+  },
+  {
+    "sourceId": "133666",
+    "leagueSourceId": "4331",
+    "name": "Borussia Dortmund",
+    "badgeUrl": "https://www.thesportsdb.com/images/media/team/badge/rwvwyw1421774365.png",
+    "stadium": "Signal Iduna Park"
+  },
+  {
+    "sourceId": "133714",
+    "leagueSourceId": "4334",
+    "name": "Paris Saint-Germain",
+    "badgeUrl": "https://www.thesportsdb.com/images/media/team/badge/7qddvl1600094770.png",
+    "stadium": "Parc des Princes"
+  }
+]

@@ -1,40 +1,604 @@
+/* ── Google Fonts ─────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ── CSS Custom Properties ────────────────────────────────────────────────── */
+:root {
+  --pitch-dark: #0f5c26;
+  --pitch-mid: #157332;
+  --pitch-light: #1b8a3e;
+  --pitch-line: rgba(255, 255, 255, 0.75);
+  --pitch-line-faint: rgba(255, 255, 255, 0.35);
+  --card-bg: rgba(13, 18, 24, 0.94);
+  --card-border: rgba(255, 255, 255, 0.12);
+  --accent-green: #719a73;
+  --accent-blue: #1f73c2;
+  --accent-gold: #facc15;
+  --accent-red: #ef5a5a;
+  --accent-amber: #f5b942;
+  --bg-primary: #001f27;
+  --bg-secondary: #003a35;
+  --bg-tertiary: #719a73;
+  --bg-card: #003a35;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: rgba(255, 255, 255, 0.12);
+  --shadow-glow: 0 0 20px rgba(61, 220, 132, 0.25);
+}
+
+.light-mode {
+  --bg-primary: #f1f5f9;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e2e8f0;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --border-color: rgba(0, 0, 0, 0.12);
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(0, 0, 0, 0.12);
+  --pitch-dark: #15803d;
+  --pitch-mid: #16a34a;
+  --pitch-light: #22c55e;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
 @layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
   html {
     scroll-behavior: smooth;
+    height: 100%;
   }
+
   body {
     @apply font-body antialiased;
-    background-color: #070c0a;
+    background-color: var(--bg-primary);
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
+
+  #root {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
   ::selection {
-    background: rgba(34, 197, 94, 0.35);
+    background: rgba(61, 220, 132, 0.3);
   }
+
   :focus-visible {
-    outline: 2px solid #4ade80;
+    outline: 2px solid var(--accent-green);
     outline-offset: 2px;
   }
 }
 
-@layer utilities {
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #37475a;
-    border-radius: 999px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .text-stroke-dark {
-    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-  }
+/* ── Pitch Styles ─────────────────────────────────────────────────────────── */
+.pitch-container {
+  background-image: url('https://images.unsplash.com/photo-1518605368461-1e1e3e26fb22?q=80&w=2000&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
 }
+
+.pitch-stripes {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* ── Player Card on Pitch ─────────────────────────────────────────────────── */
+.pitch-player-card {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  user-select: none;
+  z-index: 10;
+  transition: filter 0.2s ease, transform 0.2s ease, z-index 0s;
+}
+
+.pitch-player-card:hover {
+  z-index: 20;
+  transform: translate(-50%, -50%) scale(1.06);
+  filter: drop-shadow(0 0 18px rgba(250, 204, 21, 0.8));
+}
+
+.pitch-player-card.dragging {
+  cursor: grabbing;
+  z-index: 100;
+  transform: translate(-50%, -50%) scale(1.1);
+  filter: drop-shadow(0 0 24px rgba(61, 220, 132, 0.9));
+}
+
+.pitch-player-card.drag-over {
+  filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.9));
+}
+
+/* ── EA Sports FC FUT Gold Card Exact Replica Styles ───────────────────────── */
+.fut-card-container {
+  position: relative;
+  width: 96px;
+  height: 142px;
+  user-select: none;
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fut-card-container.mini {
+  width: 72px;
+  height: 106px;
+}
+
+.fut-card {
+  position: relative;
+  width: 100%;
+  height: 128px;
+  border-radius: 14px 14px 0 0;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 92%, 50% 100%, 0% 92%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.85);
+  border: 1.5px solid #fef08a;
+}
+
+.fut-card-container.mini .fut-card {
+  height: 94px;
+}
+
+/* Wavy texture overlay */
+.fut-card-waves {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-radial-gradient(
+    circle at 50% 20%,
+    transparent 0px,
+    transparent 12px,
+    rgba(255, 255, 255, 0.08) 12px,
+    rgba(255, 255, 255, 0.08) 24px
+  );
+  pointer-events: none;
+}
+
+/* Card Tiers */
+.fut-card-gold {
+  background: radial-gradient(ellipse at 50% 25%, #fef08a 0%, #facc15 45%, #ca8a04 85%, #854d0e 100%);
+  color: #1e1b04;
+  border-color: #fef08a;
+}
+
+.fut-card-special {
+  background: radial-gradient(ellipse at 50% 25%, #334155 0%, #0f172a 45%, #020617 100%);
+  color: #fde047;
+  border-color: #facc15;
+}
+
+.fut-card-silver {
+  background: radial-gradient(ellipse at 50% 25%, #f8fafc 0%, #cbd5e1 45%, #64748b 100%);
+  color: #0f172a;
+  border-color: #f1f5f9;
+}
+
+.fut-card-bronze {
+  background: radial-gradient(ellipse at 50% 25%, #fed7aa 0%, #ea580c 45%, #7c2d12 100%);
+  color: #2a0e04;
+  border-color: #ffedd5;
+}
+
+.fut-card-mgr {
+  background: radial-gradient(ellipse at 50% 25%, #38bdf8 0%, #0284c7 45%, #0369a1 100%);
+  color: #ffffff;
+  border-color: #7dd3fc;
+}
+
+/* Top-Left Header (Rating, Position, PlayStyle) */
+.fut-card-header-left {
+  position: absolute;
+  top: 5px;
+  left: 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 0.95;
+  z-index: 2;
+}
+
+.fut-rating-num {
+  font-family: 'Inter', 'Oswald', sans-serif;
+  font-size: 1.12rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: currentColor;
+}
+
+.fut-pos-code {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+.fut-playstyle-badge {
+  margin-top: 2px;
+}
+
+/* Cutout Photo */
+.fut-card-photo {
+  width: 58px;
+  height: 58px;
+  margin-top: 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.fut-card-container.mini .fut-card-photo {
+  width: 42px;
+  height: 42px;
+}
+
+.fut-card-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.fut-photo-initials {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+/* Name Banner */
+.fut-name-banner {
+  width: 100%;
+  background: rgba(254, 240, 138, 0.95);
+  color: #1e1b04;
+  text-align: center;
+  font-family: 'Inter', 'Oswald', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 1px 0;
+  margin-top: 2px;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.fut-card-special .fut-name-banner {
+  background: rgba(15, 23, 42, 0.95);
+  color: #fde047;
+}
+
+/* 6 Attributes Grid */
+.fut-stats-grid {
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 3px;
+  z-index: 2;
+}
+
+.fut-stats-labels {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  width: 100%;
+  text-align: center;
+  font-size: 0.45rem;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.fut-stats-values {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  width: 100%;
+  text-align: center;
+  font-size: 0.55rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Bottom Badges Row */
+.fut-card-badges {
+  position: absolute;
+  bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.6rem;
+  z-index: 3;
+}
+
+/* Chemistry Gem on Bottom Left */
+.fut-chem-gem {
+  position: absolute;
+  bottom: 12px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #0284c7;
+  color: #fff;
+  font-size: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.5);
+}
+
+/* Position Pill Attached Below Card */
+.fut-pos-badge {
+  position: absolute;
+  bottom: 0px;
+  background: #0284c7;
+  color: #ffffff;
+  padding: 1px 8px;
+  border-radius: 12px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+  z-index: 5;
+}
+
+/* ── Bottom Bench Panel Drawer ─────────────────────────────────────────────── */
+.bottom-bench-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(13, 18, 24, 0.96);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-color);
+  z-index: 45;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.bottom-bench-panel.collapsed {
+  transform: translateY(calc(100% - 34px));
+}
+
+.bottom-bench-header {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  background: rgba(17, 24, 34, 0.95);
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  user-select: none;
+}
+
+.bottom-bench-body {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.bench-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.bench-section-label {
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding: 4px 0;
+  border-right: 1px solid var(--border-color);
+  margin-right: 2px;
+}
+
+/* ── Modals & Glass Panels ─────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(10px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8);
+  max-height: 92vh;
+  width: 100%;
+  max-width: 780px;
+  display: flex;
+  flex-direction: column;
+}
+
+.glass-card {
+  background: rgba(26, 35, 50, 0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
+
+.glass-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  border-color: rgba(250, 204, 21, 0.35);
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  height: 52px;
+  background: rgba(13, 18, 24, 0.96);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  z-index: 50;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  transition: color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+
+.nav-tab:hover { color: var(--text-primary); background: rgba(255, 255, 255, 0.08); }
+.nav-tab.active { color: var(--accent-gold); background: rgba(250, 204, 21, 0.12); }
+
+/* ── Buttons & Inputs ─────────────────────────────────────────────────────── */
+.btn-primary {
+  background: linear-gradient(135deg, #facc15, #ca8a04);
+  color: #1e1b04;
+  font-weight: 800;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-icon:hover { background: rgba(255, 255, 255, 0.16); color: var(--text-primary); }
+.btn-icon.active { background: rgba(250, 204, 21, 0.16); color: var(--accent-gold); border-color: rgba(250, 204, 21, 0.5); }
+
+.input-field {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-field:focus { border-color: var(--accent-gold); }
+
+.tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tab-btn {
+  padding: 0.75rem 1.1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom: -1px;
+}
+
+.tab-btn:hover { color: var(--text-primary); }
+.tab-btn.active {
+  color: var(--accent-gold);
+  border-bottom-color: var(--accent-gold);
+}
+
+.scrollbar-thin::-webkit-scrollbar { width: 4px; height: 4px; }
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+}
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

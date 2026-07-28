@@ -1,0 +1,27 @@
+[
+  {
+    "sourceId": "4328",
+    "name": "English Premier League",
+    "country": "England"
+  },
+  {
+    "sourceId": "4335",
+    "name": "Spanish La Liga",
+    "country": "Spain"
+  },
+  {
+    "sourceId": "4332",
+    "name": "Italian Serie A",
+    "country": "Italy"
+  },
+  {
+    "sourceId": "4331",
+    "name": "German Bundesliga",
+    "country": "Germany"
+  },
+  {
+    "sourceId": "4334",
+    "name": "French Ligue 1",
+    "country": "France"
+  }
+]

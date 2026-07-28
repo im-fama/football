@@ -1,43 +1,23 @@
 import mongoose from "mongoose";
 
-const StatsSchema = new mongoose.Schema(
-  {
-    matches: { type: Number, default: 0 },
-    minutes: { type: Number, default: 0 },
-    goals: { type: Number, default: 0 },
-    assists: { type: Number, default: 0 },
-    passAccuracy: { type: Number, default: 70 },
-    tacklesP90: { type: Number, default: 0 },
-    interceptionsP90: { type: Number, default: 0 },
-    shotsOnTargetPct: { type: Number, default: 0 },
-    duelsWonPct: { type: Number, default: 50 },
-    savesP90: { type: Number, default: 0 },
-    pace: { type: Number, default: 65 },
-    dribbling: { type: Number, default: 65 },
-    physical: { type: Number, default: 65 },
-    recentRatingDelta: { type: Number, default: 0 },
-  },
-  { _id: false }
-);
-
 const PlayerSchema = new mongoose.Schema(
   {
     sourceId: { type: String, index: true, unique: true, sparse: true },
+    teamId: { type: mongoose.Schema.Types.ObjectId, ref: "Team", default: null },
     name: { type: String, required: true, index: true },
-    team: { type: String, default: "Free Agent" },
-    league: { type: String, default: "" },
     position: { type: String, default: "MID" },
     nationality: { type: String, default: "" },
     age: { type: Number, default: null },
-    thumbnail: { type: String, default: "" },
-    hasRealPhoto: { type: Boolean, default: false },
-    stats: { type: StatsSchema, default: () => ({}) },
-    computedRating: { type: Number, default: 65 },
-    fetchedAt: { type: Date, default: Date.now },
+    photoUrl: { type: String, default: "" },
+    overallRating: { type: Number, default: 65 },
+    isCustom: { type: Boolean, default: false },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    instructions: { type: mongoose.Schema.Types.Mixed, default: {} },
+    notes: { type: String, default: "" }
   },
   { timestamps: true }
 );
 
-PlayerSchema.index({ name: "text", team: "text", nationality: "text" });
+PlayerSchema.index({ name: "text" });
 
 export default mongoose.model("Player", PlayerSchema);

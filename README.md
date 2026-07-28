@@ -65,8 +65,7 @@ football-analytics-dashboard/
 docker compose up --build
 ```
 
-This starts MongoDB, the ML service (models are trained automatically at
-build time), the Express API, and the Vite dev server. Open
+This starts MongoDB, the ML service (models are trained automatically atbuild time), the Express API, and the Vite dev server. Open
 **http://localhost:5173**.
 
 ### Option B — Run each service manually
@@ -191,5 +190,6 @@ an **ML Predicted** rating from the trained GradientBoostingRegressor. Showing
 both side by side is intentional — it lets you see where the model agrees or
 diverges from the simple formula, and the modal also surfaces the model's
 top feature drivers for that prediction.
-#   f o o t b a l l  
+#   f o o t b a l l 
+ 
  
