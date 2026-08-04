@@ -3,7 +3,7 @@ version: "3.9"
 services:
   mongo:
     image: mongo:7
-    container_name: fa-mongo
+    container_name: taqtiq-mongo
     ports:
       - "27017:27017"
     volumes:
@@ -12,20 +12,24 @@ services:
 
   ml-service:
     build: ./ml-service
-    container_name: fa-ml-service
+    container_name: taqtiq-ml
     ports:
       - "5001:5001"
     restart: unless-stopped
 
   server:
-    build: ./server
-    container_name: fa-server
+    # Built from the repo root so the image also contains ./database, which the
+    # API reads the CSV dumps and fixtures from when it boots.
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: taqtiq-server
     ports:
       - "5000:5000"
     environment:
       PORT: 5000
       CLIENT_ORIGIN: http://localhost:5173
-      MONGO_URI: mongodb://mongo:27017/football_analytics
+      MONGO_URI: mongodb://mongo:27017/taqtiq
       SPORTSDB_BASE_URL: https://www.thesportsdb.com/api/v1/json
       SPORTSDB_API_KEY: "123"
       ML_SERVICE_URL: http://ml-service:5001
@@ -37,9 +41,13 @@ services:
 
   client:
     build: ./client
-    container_name: fa-client
+    container_name: taqtiq-client
     ports:
       - "5173:5173"
+    environment:
+      # Inside the container "localhost" is the client itself; the API is a
+      # sibling service.
+      VITE_API_PROXY: http://server:5000
     depends_on:
       - server
     restart: unless-stopped

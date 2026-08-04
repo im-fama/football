@@ -1,0 +1,59 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Client build output
+client/dist/
+client/build/
+.next/
+out/
+
+# Python / ML Service
+ml-service/.venv/
+ml-service/venv/
+ml-service/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+.env
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Database / Large files
+# The EA FC (Kaggle) dumps are up to ~96 MB each — too big for git. Drop them
+# into ./database and the API loads them automatically on first start; without
+# them it falls back to the JSON fixtures in database/fixtures.
+database/*.csv
+database/temp/
+
+# Embedded MongoDB data directory (created when no mongod is running)
+.mongo-data/
+
+# Runtime logs
+server/ingest_error.log

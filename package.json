@@ -1,0 +1,20 @@
+{
+  "name": "taqtiq",
+  "version": "1.0.0",
+  "description": "taqtiq - Football Decision & Squad Management Platform",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "npm install && npm --prefix server install && npm --prefix client install && npm --prefix database install",
+    "dev": "concurrently -n api,web -c green,cyan \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "start": "npm --prefix server start",
+    "build": "npm --prefix client install && npm --prefix client run build",
+    "seed": "npm --prefix database run seed",
+    "seed:kaggle": "npm --prefix database run seed:kaggle"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

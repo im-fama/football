@@ -5,6 +5,9 @@ export default function DrawingLayer() {
   const { drawings, setDrawings, drawingMode, strokeColor } = useSquad();
   const svgRef = useRef(null);
   const [currentStroke, setCurrentStroke] = useState(null);
+  // Date.now() alone collides for two strokes drawn in the same millisecond,
+  // which duplicates React keys and breaks the laser fade-out timers.
+  const strokeSeq = useRef(0);
 
   // Helper to get coordinates relative to the SVG viewport (0 to 1000)
   const getCoordinates = (e) => {
@@ -21,7 +24,7 @@ export default function DrawingLayer() {
     const { x, y } = getCoordinates(e);
     
     setCurrentStroke({
-      id: String(Date.now()),
+      id: `${Date.now()}-${strokeSeq.current++}`,
       tool: drawingMode,
       color: strokeColor,
       points: [{ x, y }],
@@ -89,34 +92,113 @@ export default function DrawingLayer() {
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
     >
+      <defs>
+        <filter id="laser-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur1" />
+          <feGaussianBlur stdDeviation="8" result="blur2" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" result="noise" />
+          <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 4 -1" in="noise" result="coloredNoise" />
+          <feComposite operator="in" in="coloredNoise" in2="blur2" result="glitter" />
+          <feMerge>
+            <feMergeNode in="blur2" />
+            <feMergeNode in="glitter" />
+            <feMergeNode in="blur1" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
       {/* Existing strokes */}
-      {drawings.map((stroke) => (
-        <path
-          key={stroke.id}
-          d={pointsToPath(stroke.points)}
-          fill="none"
-          stroke={stroke.color}
-          strokeWidth={stroke.tool === "laser" ? 6 : 4}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{
-            opacity: stroke.opacity,
-            transition: "opacity 0.5s ease"
-          }}
-        />
-      ))}
+      {drawings.map((stroke) => {
+        if (stroke.tool === "laser") {
+          return (
+            <g key={stroke.id} style={{ opacity: stroke.opacity, transition: "opacity 0.5s ease" }}>
+              <path
+                d={pointsToPath(stroke.points)}
+                fill="none"
+                stroke={stroke.color}
+                strokeWidth={16}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                filter="url(#laser-glow)"
+                opacity={0.8}
+              />
+              {/* Whitish sides / core */}
+              <path
+                d={pointsToPath(stroke.points)}
+                fill="none"
+                stroke="#ffffff"
+                strokeWidth={8}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity={0.9}
+              />
+              <path
+                d={pointsToPath(stroke.points)}
+                fill="none"
+                stroke={stroke.color}
+                strokeWidth={4}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </g>
+          );
+        }
+        return (
+          <path
+            key={stroke.id}
+            d={pointsToPath(stroke.points)}
+            fill="none"
+            stroke={stroke.color}
+            strokeWidth={4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ opacity: stroke.opacity, transition: "opacity 0.5s ease" }}
+          />
+        );
+      })}
 
       {/* Current drawing stroke */}
-      {currentStroke && (
+      {currentStroke && currentStroke.tool === "laser" ? (
+        <g>
+          <path
+            d={pointsToPath(currentStroke.points)}
+            fill="none"
+            stroke={currentStroke.color}
+            strokeWidth={16}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            filter="url(#laser-glow)"
+            opacity={0.8}
+          />
+          <path
+            d={pointsToPath(currentStroke.points)}
+            fill="none"
+            stroke="#ffffff"
+            strokeWidth={8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={0.9}
+          />
+          <path
+            d={pointsToPath(currentStroke.points)}
+            fill="none"
+            stroke={currentStroke.color}
+            strokeWidth={4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </g>
+      ) : currentStroke ? (
         <path
           d={pointsToPath(currentStroke.points)}
           fill="none"
           stroke={currentStroke.color}
-          strokeWidth={currentStroke.tool === "laser" ? 6 : 4}
+          strokeWidth={4}
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-      )}
+      ) : null}
     </svg>
   );
 }

@@ -1,4 +1,5 @@
 import { Watchlist } from "../models/index.js";
+import { isValidObjectId } from "mongoose";
 import { enrichPlayerDoc } from "./playerController.js";
 
 export async function listWatchlist(req, res, next) {
@@ -26,7 +27,9 @@ export async function listWatchlist(req, res, next) {
 export async function addToWatchlist(req, res, next) {
   try {
     const { playerId, note } = req.body;
-    if (!playerId) return res.status(400).json({ error: "playerId is required." });
+    if (!isValidObjectId(playerId)) {
+      return res.status(400).json({ error: "A valid playerId is required." });
+    }
 
     // Check if already in watchlist
     const existing = await Watchlist.findOne({ userId: req.user._id, playerId });
@@ -52,6 +55,9 @@ export async function addToWatchlist(req, res, next) {
 export async function removeFromWatchlist(req, res, next) {
   try {
     const { playerId } = req.params;
+    if (!isValidObjectId(playerId)) {
+      return res.status(400).json({ error: "A valid playerId is required." });
+    }
     const item = await Watchlist.findOneAndDelete({ userId: req.user._id, playerId });
     if (!item) return res.status(404).json({ error: "Item not found in watchlist." });
     res.json({ success: true, message: "Removed from watchlist." });

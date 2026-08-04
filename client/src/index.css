@@ -67,6 +67,11 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
+  select option {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
   #root {
     height: 100vh;
     display: flex;
@@ -124,11 +129,11 @@
   filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.9));
 }
 
-/* ── EA Sports FC FUT Gold Card Exact Replica Styles ───────────────────────── */
+/* ── EA Sports FC 26 Exact Replica Styles ───────────────────────── */
 .fut-card-container {
   position: relative;
-  width: 96px;
-  height: 142px;
+  width: 140px;
+  height: 200px;
   user-select: none;
   cursor: grab;
   display: flex;
@@ -138,27 +143,30 @@
 }
 
 .fut-card-container.mini {
-  width: 72px;
-  height: 106px;
+  width: 90px;
+  height: 130px;
 }
 
 .fut-card {
   position: relative;
   width: 100%;
-  height: 128px;
-  border-radius: 14px 14px 0 0;
-  clip-path: polygon(0% 0%, 100% 0%, 100% 92%, 50% 100%, 0% 92%);
+  height: 100%;
+  border-radius: 6px 6px 0 0;
+  clip-path: polygon(5% 0, 95% 0, 100% 5%, 100% 88%, 50% 100%, 0 88%, 0 5%);
   display: flex;
   flex-direction: column;
-  align-items: center;
   overflow: hidden;
   z-index: 1;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.85);
-  border: 1.5px solid #fef08a;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
 }
 
-.fut-card-container.mini .fut-card {
-  height: 94px;
+.fut-card::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 1px solid rgba(255,255,255,0.4);
+  clip-path: polygon(5% 0, 95% 0, 100% 5%, 100% 88%, 50% 100%, 0 88%, 0 5%);
+  pointer-events: none;
 }
 
 /* Wavy texture overlay */
@@ -177,77 +185,93 @@
 
 /* Card Tiers */
 .fut-card-gold {
-  background: radial-gradient(ellipse at 50% 25%, #fef08a 0%, #facc15 45%, #ca8a04 85%, #854d0e 100%);
-  color: #1e1b04;
-  border-color: #fef08a;
+  background: radial-gradient(ellipse at 50% 50%, #fef08a 0%, #d4af37 45%, #b59410 85%, #7a6200 100%);
+  color: #1a1600;
 }
 
 .fut-card-special {
-  background: radial-gradient(ellipse at 50% 25%, #334155 0%, #0f172a 45%, #020617 100%);
+  background: radial-gradient(ellipse at 50% 50%, #334155 0%, #0f172a 45%, #020617 100%);
   color: #fde047;
-  border-color: #facc15;
 }
 
 .fut-card-silver {
-  background: radial-gradient(ellipse at 50% 25%, #f8fafc 0%, #cbd5e1 45%, #64748b 100%);
+  background: radial-gradient(ellipse at 50% 50%, #f8fafc 0%, #cbd5e1 45%, #94a3b8 100%);
   color: #0f172a;
-  border-color: #f1f5f9;
 }
 
 .fut-card-bronze {
-  background: radial-gradient(ellipse at 50% 25%, #fed7aa 0%, #ea580c 45%, #7c2d12 100%);
+  background: radial-gradient(ellipse at 50% 50%, #fed7aa 0%, #d97706 45%, #78350f 100%);
   color: #2a0e04;
-  border-color: #ffedd5;
 }
 
 .fut-card-mgr {
-  background: radial-gradient(ellipse at 50% 25%, #38bdf8 0%, #0284c7 45%, #0369a1 100%);
+  background: radial-gradient(ellipse at 50% 50%, #38bdf8 0%, #0284c7 45%, #0369a1 100%);
   color: #ffffff;
-  border-color: #7dd3fc;
 }
 
-/* Top-Left Header (Rating, Position, PlayStyle) */
-.fut-card-header-left {
-  position: absolute;
-  top: 5px;
-  left: 7px;
+/* Layout for FC26 Style */
+.fut-card-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  line-height: 0.95;
   z-index: 2;
 }
 
+.fut-card-top {
+  display: flex;
+  height: 55%;
+  position: relative;
+}
+
+.fut-card-left-col {
+  width: 35%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 12px;
+  padding-left: 4px;
+  border-right: 1px solid rgba(0,0,0,0.08);
+}
+
 .fut-rating-num {
-  font-family: 'Inter', 'Oswald', sans-serif;
-  font-size: 1.12rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  color: currentColor;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .fut-pos-code {
   font-family: 'Oswald', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  margin-top: 1px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-top: -2px;
+  margin-bottom: 6px;
 }
 
-.fut-playstyle-badge {
-  margin-top: 2px;
+.fut-flags {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  margin-top: auto;
+  margin-bottom: 4px;
 }
 
-/* Cutout Photo */
+.fut-flags img, .fut-flags .placeholder-flag {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
 .fut-card-photo {
-  width: 58px;
-  height: 58px;
-  margin-top: 4px;
+  width: 65%;
+  height: 100%;
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  z-index: 1;
 }
 
 .fut-card-container.mini .fut-card-photo {
@@ -256,70 +280,80 @@
 }
 
 .fut-card-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
+  width: 120%;
+  height: 120%;
+  object-fit: contain;
+  object-position: bottom;
+  margin-bottom: -5px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
 .fut-photo-initials {
   font-family: 'Oswald', sans-serif;
-  font-size: 1.3rem;
-  font-weight: 800;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+  letter-spacing: 1px;
 }
 
-/* Name Banner */
-.fut-name-banner {
-  width: 100%;
-  background: rgba(254, 240, 138, 0.95);
-  color: #1e1b04;
-  text-align: center;
-  font-family: 'Inter', 'Oswald', sans-serif;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  padding: 1px 0;
-  margin-top: 2px;
-  z-index: 2;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-.fut-card-special .fut-name-banner {
-  background: rgba(15, 23, 42, 0.95);
-  color: #fde047;
-}
-
-/* 6 Attributes Grid */
-.fut-stats-grid {
-  width: 90%;
+/* Bottom Half (Name & Stats) */
+.fut-card-bottom {
+  height: 45%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 3px;
-  z-index: 2;
+  padding: 0 8px;
 }
 
-.fut-stats-labels {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  width: 100%;
-  text-align: center;
-  font-size: 0.45rem;
+.fut-name-banner {
   font-family: 'Oswald', sans-serif;
+  font-size: 1.1rem;
   font-weight: 700;
-  opacity: 0.85;
+  text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+  border-bottom: 1px solid rgba(0,0,0,0.15);
+  padding-bottom: 2px;
+  margin-bottom: 4px;
 }
 
-.fut-stats-values {
+.fut-stats-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 2px 8px;
   width: 100%;
-  text-align: center;
-  font-size: 0.55rem;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 900;
-  line-height: 1;
+  padding: 0 4px;
 }
+
+.fut-stat-item {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 4px;
+}
+
+.fut-stat-val {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.fut-stat-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 0.65rem;
+}
+
+/* Mini card adjustments */
+.fut-card-container.mini .fut-rating-num { font-size: 1.2rem; }
+.fut-card-container.mini .fut-pos-code { font-size: 0.6rem; }
+.fut-card-container.mini .fut-name-banner { font-size: 0.8rem; margin-top: 4px; border: none; }
+.fut-card-container.mini .fut-flags { display: none; }
+.fut-card-container.mini .fut-card-photo { width: 100%; height: 100%; position: absolute; opacity: 0.5; z-index: 0; }
+.fut-card-container.mini .fut-card-left-col { width: 100%; border: none; align-items: center; z-index: 10; padding-top: 8px;}
+.fut-card-container.mini .fut-card-bottom { display: none; }
 
 /* Bottom Badges Row */
 .fut-card-badges {
@@ -599,6 +633,23 @@
   border-radius: 999px;
 }
 .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+
+/* Pitch specific card scaling */
+.pitch-player-card {
+  transform: scale(0.75);
+  transform-origin: center center;
+  transition: transform 0.2s ease, z-index 0.2s ease;
+}
+
+.pitch-player-card:hover {
+  transform: scale(0.85);
+  z-index: 10;
+}
+
+.pitch-player-card.dragging {
+  transform: scale(0.9);
+  z-index: 50;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

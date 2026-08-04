@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 import FutCard from "../FutCard";
 import { useSquad } from "../../context/SquadContext";
-import { UserPlus } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function BenchRail({ onCardClick }) {
   const { bench } = useSquad();
@@ -15,57 +16,84 @@ export default function BenchRail({ onCardClick }) {
     (p) => p.position === "MGR" || p.position === "COACH"
   );
 
+  const [benchOpen, setBenchOpen] = useState(true);
+
   return (
-    <div className="w-full bg-pitch-900/95 border-t border-pitch-700/60 p-4 shadow-card select-none">
-      <div className="flex items-center justify-between mb-3 px-2">
-        <div className="flex items-center gap-4">
-          <span className="font-display text-sm font-semibold uppercase tracking-wider text-brand-300">
-            Squad Bench
-          </span>
-          <div className="flex gap-2">
-            <span className="px-2 py-0.5 rounded bg-pulse-blue/15 text-pulse-blue text-[10px] font-bold">
-              SUB ({substitutes.length})
-            </span>
-            <span className="px-2 py-0.5 rounded bg-pulse-amber/15 text-pulse-amber text-[10px] font-bold">
-              MGR ({staff.length})
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-pitch-500 font-medium">
-          <UserPlus className="h-3.5 w-3.5 text-brand-400 animate-pulse" />
-          Drag players onto the field or swap them
-        </div>
+    <div className={`absolute bottom-0 w-full z-20 select-none pointer-events-none transition-transform duration-300 ${benchOpen ? 'translate-y-0' : 'translate-y-[85%]'}`}>
+      <div className="w-full flex justify-center mb-2">
+        <button 
+          onClick={() => setBenchOpen(!benchOpen)}
+          className="bg-black/60 text-white px-6 py-1 rounded-t-xl border border-b-0 border-white/20 hover:bg-black/90 transition-all pointer-events-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]"
+          title="Toggle Bench"
+        >
+          {benchOpen ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+        </button>
       </div>
+      
+      <div className="w-full bg-gradient-to-t from-black via-black/80 to-transparent pt-4 pb-4 px-4 pointer-events-auto">
+
 
       <Droppable droppableId="bench" direction="horizontal" type="player">
         {(provided, snapshot) => (
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`flex items-center gap-4 overflow-x-auto min-h-[110px] py-1 px-2 scrollbar-thin rounded-xl transition-colors ${
-              snapshot.isDraggingOver ? "bg-brand-500/5 border border-dashed border-brand-500/25" : ""
+            className={`flex items-center overflow-x-auto min-h-[180px] pb-4 pt-8 px-4 scrollbar-hide transition-colors ${
+              snapshot.isDraggingOver ? "bg-white/5 border border-dashed border-white/20 rounded-xl" : ""
             }`}
           >
-            {bench.map((player, index) => (
-              <Draggable key={player._id} draggableId={player._id} index={index}>
-                {(dragProvided, dragSnapshot) => (
-                  <div
-                    ref={dragProvided.innerRef}
-                    {...dragProvided.draggableProps}
-                    {...dragProvided.dragHandleProps}
-                    onClick={() => onCardClick(player)}
-                    style={{
-                      ...dragProvided.draggableProps.style,
+            {/* SUB Label */}
+            {substitutes.length > 0 && (
+              <div className="flex flex-col items-center mr-2 opacity-60">
+                <span className="font-display text-xs tracking-widest -rotate-90 origin-bottom mb-8">SUB</span>
+                <div className="w-[1px] h-12 bg-white/40"></div>
+              </div>
+            )}
+            
+            {bench.map((player, index) => {
+              // Decide if we are crossing the boundary to MGR to show the divider
+              const isFirstMgr = player.position === "MGR" && index === substitutes.length;
+              
+              return (
+                <React.Fragment key={player._id}>
+                  {isFirstMgr && (
+                    <div className="flex flex-col items-center mx-4 opacity-60">
+                      <span className="font-display text-xs tracking-widest -rotate-90 origin-bottom mb-8">MGR</span>
+                      <div className="w-[1px] h-12 bg-white/40"></div>
+                    </div>
+                  )}
+                  
+                  <Draggable draggableId={player._id} index={index}>
+                    {(dragProvided, dragSnapshot) => {
+                      const child = (
+                        <div
+                          ref={dragProvided.innerRef}
+                          {...dragProvided.draggableProps}
+                          {...dragProvided.dragHandleProps}
+                          onClick={() => onCardClick(player)}
+                          style={{
+                            ...dragProvided.draggableProps.style,
+                          }}
+                          className={`flex-shrink-0 -ml-10 first:-ml-0 transition-all duration-200 hover:-translate-y-4 hover:ml-0 hover:mr-6 hover:z-30 relative ${
+                            dragSnapshot.isDragging ? "scale-105 z-50" : "z-10"
+                          }`}
+                        >
+                          <div className="transform scale-[0.6] origin-bottom hover:scale-[0.65] transition-transform w-[140px] h-[200px]">
+                            <FutCard player={player} showStats={false} />
+                          </div>
+                        </div>
+                      );
+
+                      if (dragSnapshot.isDragging) {
+                        return document.body ? createPortal(child, document.body) : child;
+                      }
+
+                      return child;
                     }}
-                    className={`flex-shrink-0 transition-transform ${
-                      dragSnapshot.isDragging ? "scale-105" : "hover:-translate-y-1"
-                    }`}
-                  >
-                    <FutCard player={player} isMini={true} showStats={false} />
-                  </div>
-                )}
-              </Draggable>
-            ))}
+                  </Draggable>
+                </React.Fragment>
+              );
+            })}
             {provided.placeholder}
             {bench.length === 0 && (
               <div className="w-full text-center py-6 text-sm text-pitch-500 font-medium">
@@ -75,6 +103,7 @@ export default function BenchRail({ onCardClick }) {
           </div>
         )}
       </Droppable>
+      </div>
     </div>
   );
 }

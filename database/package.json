@@ -1,0 +1,18 @@
+{
+  "name": "taqtiq-database",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "seed": "node seed.js",
+    "seed:kaggle": "node ingest_kaggle.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "csv-parser": "^3.2.1",
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.6.0"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.2.0"
+  }
+}

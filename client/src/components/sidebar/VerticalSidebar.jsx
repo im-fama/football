@@ -1,20 +1,23 @@
 import React, { useState } from "react";
 import { useSquad } from "../../context/SquadContext";
 import { useAuth } from "../../context/AuthContext";
-import { Edit2, Zap, Palette, Trash2, Camera, ChevronLeft, ChevronRight } from "lucide-react";
-import api from "../../services/api";
+import { Edit2, Zap, Palette, Trash2, Camera, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { createBoard } from "../../services/api";
+import TacticsSuggestionModal from "../pitch/TacticsSuggestionModal";
 
-const PRESET_FORMATIONS = ["4-3-3", "4-4-2", "4-2-3-1", "3-5-2", "5-3-2"];
 const COLOR_PRESETS = ["#4ade80", "#ef5a5a", "#4f8ff7", "#f5b942", "#ffffff"];
 
 export default function VerticalSidebar() {
   const {
     formation,
     setFormation,
+    availableFormations,
+    slots,
     drawingMode,
     setDrawingMode,
     strokeColor,
     setStrokeColor,
+    drawings,
     setDrawings,
     starters,
     selectedTeamId
@@ -24,6 +27,7 @@ export default function VerticalSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [boardName, setBoardName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showTacticsModal, setShowTacticsModal] = useState(false);
 
   const toggleCollapsed = () => setCollapsed(!collapsed);
 
@@ -43,23 +47,31 @@ export default function VerticalSidebar() {
     const name = boardName.trim() || `Tactic - ${formation} - ${new Date().toLocaleDateString()}`;
     setSaving(true);
     try {
-      const lineupItems = Object.entries(starters).map(([slot, player], index) => ({
-        slotIndex: index,
-        slotLabel: slot,
-        playerId: player._id
-      }));
+      const lineupItems = Object.entries(starters)
+        .filter(([, player]) => player)
+        .map(([slot, player], index) => ({
+          slotIndex: index,
+          slotLabel: slot,
+          playerId: player._id
+        }));
 
-      await api.createBoard({
+      const customSlots =
+        formation === "Custom" ? slots.map((s) => ({ code: s.code, x: s.x, y: s.y })) : undefined;
+
+      await createBoard({
         title: name,
         formationName: formation,
         lineup: lineupItems,
+        customSlots,
+        // Snapshots are only useful if the telestrator strokes come back too.
+        drawings,
         notes: `Lineup snapshot for team ${selectedTeamId || "general"}`
       });
       alert(`Tactical board "${name}" saved successfully!`);
       setBoardName("");
     } catch (err) {
       console.error(err);
-      alert("Failed to save tactical board snapshot.");
+      alert(err.response?.data?.error || "Failed to save tactical board snapshot.");
     } finally {
       setSaving(false);
     }
@@ -112,14 +124,21 @@ export default function VerticalSidebar() {
         <select
           value={formation}
           onChange={(e) => setFormation(e.target.value)}
-          className="input-field py-2 bg-pitch-850 text-sm"
+          className="input-field py-2 bg-pitch-850 text-white text-sm border-pitch-700"
         >
-          {PRESET_FORMATIONS.map((f) => (
-            <option key={f} value={f}>
+          {availableFormations.map((f) => (
+            <option key={f} value={f} className="bg-pitch-900 text-white">
               {f}
             </option>
           ))}
         </select>
+        <button
+          onClick={() => setShowTacticsModal(true)}
+          className="mt-2 w-full flex items-center justify-center gap-2 bg-gradient-to-r from-brand-500/20 to-brand-600/20 text-brand-300 border border-brand-500/30 hover:bg-brand-500/30 py-2 rounded-lg text-sm font-semibold transition-all"
+        >
+          <Sparkles className="w-4 h-4" />
+          AI Tactics
+        </button>
       </div>
 
       <div className="h-[1px] w-full bg-pitch-800" />
@@ -206,6 +225,10 @@ export default function VerticalSidebar() {
           {saving ? "Saving..." : "Save Tactical Board"}
         </button>
       </div>
+
+      {showTacticsModal && (
+        <TacticsSuggestionModal onClose={() => setShowTacticsModal(false)} />
+      )}
     </div>
   );
 }

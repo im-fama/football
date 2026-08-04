@@ -4,13 +4,22 @@ export default {
   theme: {
     extend: {
       colors: {
+        // 400/300/200 and the 850/550 half-steps are used throughout the UI for
+        // muted text; without them Tailwind emitted no rule and the text
+        // rendered at the inherited colour.
         pitch: {
           950: "#070c0a",
           900: "#0b1310",
+          850: "#0e1713",
           800: "#111c17",
           700: "#1a2921",
           600: "#25392e",
+          550: "#31473b",
           500: "#3a5445",
+          400: "#6b8577",
+          300: "#9db3a6",
+          200: "#c6d5cb",
+          100: "#e4ede7",
         },
         brand: {
           300: "#7ee2a8",

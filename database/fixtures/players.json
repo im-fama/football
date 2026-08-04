@@ -1,37 +1,37 @@
 [
   {
     "sourceId": "p01",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Kepa Arrizabalaga",
     "position": "GK",
     "nationality": "Spanish",
     "age": 29,
-    "photoUrl": "https://i.pravatar.cc/150?u=p01",
+    "photoUrl": "",
     "overallRating": 81
   },
   {
     "sourceId": "p02",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Luis Varga",
     "position": "GK",
     "nationality": "Spanish",
     "age": 24,
-    "photoUrl": "https://i.pravatar.cc/150?u=p02",
+    "photoUrl": "",
     "overallRating": 75
   },
   {
     "sourceId": "p03",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Piero Hincapié",
     "position": "CB",
     "nationality": "Ecuador",
     "age": 22,
-    "photoUrl": "https://i.pravatar.cc/150?u=p03",
+    "photoUrl": "",
     "overallRating": 83
   },
   {
     "sourceId": "p04",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Aleksandr Petrov",
     "position": "CB",
     "nationality": "Russian",
@@ -41,7 +41,7 @@
   },
   {
     "sourceId": "p05",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Yusuf Adebayo",
     "position": "LB",
     "nationality": "Nigerian",
@@ -51,7 +51,7 @@
   },
   {
     "sourceId": "p06",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Henrik Larsen",
     "position": "RB",
     "nationality": "Danish",
@@ -61,7 +61,7 @@
   },
   {
     "sourceId": "p07",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Carlos Mendez",
     "position": "CB",
     "nationality": "Colombian",
@@ -71,17 +71,17 @@
   },
   {
     "sourceId": "p08",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Sandro Tonali",
     "position": "CM",
     "nationality": "Italian",
     "age": 24,
-    "photoUrl": "https://i.pravatar.cc/150?u=p08",
+    "photoUrl": "",
     "overallRating": 87
   },
   {
     "sourceId": "p09",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Takashi Mori",
     "position": "CDM",
     "nationality": "Japanese",
@@ -91,17 +91,17 @@
   },
   {
     "sourceId": "p10",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Jude Bellingham",
     "position": "CAM",
     "nationality": "English",
     "age": 21,
-    "photoUrl": "https://i.pravatar.cc/150?u=p10",
+    "photoUrl": "",
     "overallRating": 90
   },
   {
     "sourceId": "p11",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "James O'Brien",
     "position": "CM",
     "nationality": "Irish",
@@ -111,7 +111,7 @@
   },
   {
     "sourceId": "p12",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Kwame Asante",
     "position": "CDM",
     "nationality": "Ghanaian",
@@ -121,37 +121,37 @@
   },
   {
     "sourceId": "p13",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Erling Haaland",
     "position": "ST",
     "nationality": "Norwegian",
     "age": 24,
-    "photoUrl": "https://i.pravatar.cc/150?u=p13",
+    "photoUrl": "",
     "overallRating": 91
   },
   {
     "sourceId": "p14",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Bukayo Saka",
     "position": "RW",
     "nationality": "English",
     "age": 22,
-    "photoUrl": "https://i.pravatar.cc/150?u=p14",
+    "photoUrl": "",
     "overallRating": 88
   },
   {
     "sourceId": "p15",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Kylian Mbappé",
     "position": "LW",
     "nationality": "French",
     "age": 25,
-    "photoUrl": "https://i.pravatar.cc/150?u=p15",
+    "photoUrl": "",
     "overallRating": 91
   },
   {
     "sourceId": "p16",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Finn Andersen",
     "position": "ST",
     "nationality": "Norwegian",
@@ -161,7 +161,7 @@
   },
   {
     "sourceId": "p17",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Arjan Krasniqi",
     "position": "LW",
     "nationality": "Albanian",
@@ -171,7 +171,7 @@
   },
   {
     "sourceId": "p18",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Pedro Lima",
     "position": "RB",
     "nationality": "Portuguese",
@@ -181,7 +181,7 @@
   },
   {
     "sourceId": "p19",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Tobias Werner",
     "position": "CB",
     "nationality": "Austrian",
@@ -191,7 +191,7 @@
   },
   {
     "sourceId": "p20",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Omar Farouk",
     "position": "CM",
     "nationality": "Moroccan",
@@ -201,7 +201,7 @@
   },
   {
     "sourceId": "p21",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Viktor Sokolov",
     "position": "LB",
     "nationality": "Ukrainian",
@@ -211,7 +211,7 @@
   },
   {
     "sourceId": "p22",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "George Papadopoulos",
     "position": "GK",
     "nationality": "Greek",
@@ -221,7 +221,7 @@
   },
   {
     "sourceId": "p23",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Emmanuel Okafor",
     "position": "CAM",
     "nationality": "Nigerian",
@@ -231,7 +231,7 @@
   },
   {
     "sourceId": "coach01",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Marco Bianchi",
     "position": "MGR",
     "nationality": "Italian",
@@ -241,7 +241,7 @@
   },
   {
     "sourceId": "coach02",
-    "teamSourceId": "133857",
+    "teamSourceId": "133604",
     "name": "Sarah Mitchell",
     "position": "MGR",
     "nationality": "English",

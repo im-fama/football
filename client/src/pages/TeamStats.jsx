@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSquad } from "../context/SquadContext";
-import api from "../services/api";
+import { getLeaderboards, getTeamMatches, getPassingNetwork, getHeatmap, getShotMap } from "../services/api";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
-import { Activity, Shield, Flame, Target } from "lucide-react";
+import { Activity, Flame, Target } from "lucide-react";
 
 export default function TeamStats() {
   const { selectedTeamId, selectedTeamName } = useSquad();
@@ -20,8 +20,8 @@ export default function TeamStats() {
 
     setLoading(true);
     Promise.all([
-      api.getLeaderboards(selectedTeamId),
-      api.getTeamMatches(selectedTeamId)
+      getLeaderboards(selectedTeamId),
+      getTeamMatches(selectedTeamId)
     ])
       .then(([lbData, matchesData]) => {
         setLeaderboards(lbData);
@@ -42,9 +42,9 @@ export default function TeamStats() {
     if (!selectedMatchId) return;
 
     Promise.all([
-      api.getPassingNetwork(selectedMatchId),
-      api.getHeatmap(selectedMatchId),
-      api.getShotMap(selectedMatchId)
+      getPassingNetwork(selectedMatchId),
+      getHeatmap(selectedMatchId),
+      getShotMap(selectedMatchId)
     ])
       .then(([passData, heatData, shotData]) => {
         setPassingNetwork(passData.passMap || []);
@@ -56,28 +56,13 @@ export default function TeamStats() {
       });
   }, [selectedMatchId]);
 
-  // Fallback mocks if empty
-  const defaultLeaderboards = leaderboards || {
-    goals: [
-      { name: "Erling Haaland", value: 32 },
-      { name: "Bukayo Saka", value: 15 },
-      { name: "Jude Bellingham", value: 12 }
-    ],
-    assists: [
-      { name: "Sandro Tonali", value: 11 },
-      { name: "Bukayo Saka", value: 10 },
-      { name: "Kylian Mbappé", value: 8 }
-    ],
-    passAccuracy: [
-      { name: "Sandro Tonali", value: 92 },
-      { name: "Jude Bellingham", value: 89 },
-      { name: "Piero Hincapié", value: 88 }
-    ],
-    tackles: [
-      { name: "Takashi Mori", value: 4.2 },
-      { name: "Piero Hincapié", value: 3.8 },
-      { name: "Henrik Larsen", value: 3.1 }
-    ]
+  // Charts render straight from the API — no placeholder names, so an empty
+  // panel reads as "no data" rather than as somebody else's numbers.
+  const boards = {
+    goals: leaderboards?.goals || [],
+    assists: leaderboards?.assists || [],
+    passAccuracy: leaderboards?.passAccuracy || [],
+    tackles: leaderboards?.tackles || []
   };
 
   const selectedMatch = matches.find(m => m._id === selectedMatchId);
@@ -102,10 +87,10 @@ export default function TeamStats() {
             <select
               value={selectedMatchId}
               onChange={(e) => setSelectedMatchId(e.target.value)}
-              className="input-field bg-pitch-800 border-pitch-700 py-1.5 text-sm"
+              className="input-field bg-pitch-800 border-pitch-700 py-1.5 text-sm text-white"
             >
               {matches.map((m) => (
-                <option key={m._id} value={m._id}>
+                <option key={m._id} value={m._id} className="bg-pitch-900 text-white">
                   {m.homeTeamId?.name} vs {m.awayTeamId?.name} ({m.homeScore} - {m.awayScore})
                 </option>
               ))}
@@ -213,39 +198,40 @@ export default function TeamStats() {
 
       {/* Season Leaderboards Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Goals */}
-        <div className="bg-pitch-900/60 border border-pitch-700/60 p-4 rounded-xl">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="font-display text-sm font-semibold text-white">Top Goal Scorers</span>
-          </div>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={defaultLeaderboards.goals} layout="vertical">
-                <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" width={100} tick={{ fill: "#8a97a6", fontSize: 11 }} />
-                <Tooltip contentStyle={{ background: "#111c17", borderColor: "#1a2921" }} />
-                <Bar dataKey="value" fill="#4ade80" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        <Leaderboard title="Top Goal Scorers" data={boards.goals} color="#4ade80" loading={loading} />
+        <Leaderboard title="Top Playmakers (Assists)" data={boards.assists} color="#4f8ff7" loading={loading} />
+        <Leaderboard title="Best Pass Accuracy (%)" data={boards.passAccuracy} color="#d9b45f" loading={loading} />
+        <Leaderboard title="Most Tackles / 90" data={boards.tackles} color="#ef5a5a" loading={loading} />
+      </div>
+    </div>
+  );
+}
 
-        {/* Assists */}
-        <div className="bg-pitch-900/60 border border-pitch-700/60 p-4 rounded-xl">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="font-display text-sm font-semibold text-white">Top Playmakers (Assists)</span>
+function Leaderboard({ title, data, color, loading }) {
+  return (
+    <div className="bg-pitch-900/60 border border-pitch-700/60 p-4 rounded-xl">
+      <div className="flex items-center gap-2 mb-4">
+        <span className="font-display text-sm font-semibold text-white">{title}</span>
+      </div>
+      <div className="h-48">
+        {loading ? (
+          <div className="h-full flex items-center justify-center text-xs text-pitch-400">
+            Loading season data…
           </div>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={defaultLeaderboards.assists} layout="vertical">
-                <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" width={100} tick={{ fill: "#8a97a6", fontSize: 11 }} />
-                <Tooltip contentStyle={{ background: "#111c17", borderColor: "#1a2921" }} />
-                <Bar dataKey="value" fill="#4f8ff7" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+        ) : data.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-xs text-pitch-500">
+            No season data for this squad yet.
           </div>
-        </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data} layout="vertical" margin={{ left: 8, right: 16 }}>
+              <XAxis type="number" hide />
+              <YAxis dataKey="name" type="category" width={110} tick={{ fill: "#9db3a6", fontSize: 11 }} />
+              <Tooltip contentStyle={{ background: "#111c17", borderColor: "#1a2921" }} />
+              <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

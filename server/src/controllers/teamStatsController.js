@@ -66,34 +66,36 @@ export async function getPassingNetwork(req, res, next) {
       pairs[key].count += 1;
     });
 
-    // Map positions to visual coordinates for pitch overlay
-    const getPosCoordinates = (pos) => {
-      const p = pos.toUpperCase();
-      if (p.includes("GK")) return { x: 50, y: 8 };
-      if (p.includes("LB")) return { x: 14, y: 26 };
-      if (p.includes("CB1") || p === "CB") return { x: 34, y: 24 };
-      if (p.includes("CB2")) return { x: 66, y: 24 };
-      if (p.includes("RB")) return { x: 86, y: 26 };
-      if (p.includes("LM")) return { x: 20, y: 48 };
-      if (p.includes("CM")) return { x: 50, y: 44 };
-      if (p.includes("RM")) return { x: 80, y: 48 };
-      if (p.includes("LW")) return { x: 18, y: 70 };
-      if (p.includes("ST")) return { x: 50, y: 76 };
-      if (p.includes("RW")) return { x: 82, y: 70 };
-      return { x: 50, y: 50 };
+    // Average pitch position per role, used as the node position for the
+    // passer. Keys match the EA FC position codes stored on Player.position.
+    const POSITION_COORDS = {
+      GK: { x: 50, y: 8 },
+      LB: { x: 14, y: 26 },
+      LWB: { x: 14, y: 34 },
+      CB: { x: 40, y: 22 },
+      RB: { x: 86, y: 26 },
+      RWB: { x: 86, y: 34 },
+      CDM: { x: 50, y: 36 },
+      LM: { x: 20, y: 48 },
+      CM: { x: 50, y: 48 },
+      RM: { x: 80, y: 48 },
+      CAM: { x: 50, y: 60 },
+      LW: { x: 18, y: 70 },
+      RW: { x: 82, y: 70 },
+      CF: { x: 50, y: 70 },
+      ST: { x: 50, y: 78 }
     };
 
-    const passMap = Object.values(pairs).map(pair => {
-      const fromCoord = getPosCoordinates(pair.fromPos);
-      // Try to estimate to player coordinate
-      const toCoord = getPosCoordinates(pair.fromPos); // fallback
-      
-      return {
-        from: fromCoord,
-        to: { x: pair.x, y: pair.y }, // use pass landing coordinate
-        weight: pair.count
-      };
-    });
+    const getPosCoordinates = (pos) => {
+      const code = (pos || "").toUpperCase().replace(/\d+$/, "");
+      return POSITION_COORDS[code] || { x: 50, y: 50 };
+    };
+
+    const passMap = Object.values(pairs).map((pair) => ({
+      from: getPosCoordinates(pair.fromPos),
+      to: { x: pair.x, y: pair.y }, // pass landing coordinate
+      weight: pair.count
+    }));
 
     res.json({ passMap });
   } catch (err) {

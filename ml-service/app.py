@@ -96,5 +96,66 @@ def similarity():
     return jsonify(results=results)
 
 
+@app.post("/predict/tactics")
+def predict_tactics():
+    """
+    Body: { "formation": "4-3-3", "players": [{ "overallRating": 85, "position": "FW" }, ...] }
+    Returns: a list of suggested tactics.
+    """
+    body = request.get_json(force=True) or {}
+    formation = body.get("formation", "4-3-3")
+    players = body.get("players", [])
+
+    if not players:
+        return jsonify(suggestions=[{
+            "name": "Balanced", 
+            "match_score": 50, 
+            "reason": "Not enough players to analyze."
+        }])
+
+    avg_rating = sum(float(p.get("overallRating", 65)) for p in players) / len(players)
+
+    suggestions = []
+    
+    # Very simple heuristics-based ML tactics recommender
+    if "4-3-3" in formation or "3-4-3" in formation:
+        suggestions.append({
+            "name": "Tiki-Taka",
+            "match_score": min(99, int(avg_rating + 10)),
+            "reason": f"Your {formation} formation thrives on short passing. With an average OVR of {int(avg_rating)}, your team can retain possession effectively."
+        })
+        suggestions.append({
+            "name": "Gegenpressing",
+            "match_score": min(99, int(avg_rating + 5)),
+            "reason": "High press fits a 3-man forward line well to win the ball back high up the pitch."
+        })
+    elif "5-" in formation or "4-5-1" in formation or "5-3-2" in formation:
+        suggestions.append({
+            "name": "Park the Bus",
+            "match_score": 95,
+            "reason": f"A {formation} is naturally defensive. Sit deep and absorb pressure."
+        })
+        suggestions.append({
+            "name": "Counter Attack",
+            "match_score": min(99, int(avg_rating + 8)),
+            "reason": "Absorb pressure with your backline and hit them on the break."
+        })
+    else:
+        suggestions.append({
+            "name": "Balanced",
+            "match_score": 85,
+            "reason": f"A standard {formation} gives you flexibility to adapt to the opponent."
+        })
+        suggestions.append({
+            "name": "Wing Play",
+            "match_score": min(99, int(avg_rating + 2)),
+            "reason": "Utilize the width of the pitch to stretch the opposition defense."
+        })
+
+    # Sort by match_score descending
+    suggestions.sort(key=lambda x: x["match_score"], reverse=True)
+    return jsonify(suggestions=suggestions)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)

@@ -1,21 +1,65 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 import FutCard from "../FutCard";
 import { useSquad } from "../../context/SquadContext";
+import DrawingLayer from "./DrawingLayer";
+import { Move } from "lucide-react";
 
-export default function FormationGrid({ onCardClick }) {
-  const { slots, starters } = useSquad();
+export default function FormationGrid({ onCardClick, onEmptySlotClick }) {
+  const { formation, slots, setSlots, starters } = useSquad();
+
+  const handlePointerDown = (e, slotCode) => {
+    if (formation !== "Custom") return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const handlePointerMove = (moveEvent) => {
+      setSlots(prev => prev.map(s => {
+        if (s.code === slotCode) {
+          return {
+            ...s,
+            // Adjust scaling factors as needed for the 3D perspective
+            x: Math.max(0, Math.min(100, s.x - (moveEvent.movementX * 0.2))),
+            y: Math.max(0, Math.min(100, s.y - (moveEvent.movementY * 0.2)))
+          };
+        }
+        return s;
+      }));
+    };
+    
+    const handlePointerUp = () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+    
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+  };
+
+
 
   return (
-    <div className="relative w-full h-full min-h-[620px] rounded-2xl overflow-hidden border border-pitch-700/60 bg-pitch-950 shadow-card">
-      {/* mowed-grass stripes */}
-      <div
-        className="absolute inset-0 opacity-[0.16] pointer-events-none"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(90deg, #1a2921 0px, #1a2921 90px, #16221b 90px, #16221b 180px)",
-        }}
+    <div className="relative w-full h-full min-h-[620px] rounded-2xl overflow-hidden border border-pitch-700/60 shadow-card bg-black/40" style={{ perspective: '1200px' }}>
+      
+      {/* Stadium Background */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80"
+        style={{ backgroundImage: 'url(/stadium_bg.png)' }}
       />
+      
+      {/* 3D Pitch Container */}
+      <div className="absolute inset-0 w-full h-full" style={{ transform: 'rotateX(30deg) scale(1.1)', transformOrigin: 'bottom center', transformStyle: 'preserve-3d' }}>
+        
+        {/* mowed-grass stripes */}
+        <div
+          className="absolute inset-0 opacity-[0.25] pointer-events-none"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(90deg, #1a2921 0px, #1a2921 90px, #16221b 90px, #16221b 180px)",
+          }}
+        />
 
       {/* radial floodlight glow */}
       <div
@@ -47,6 +91,9 @@ export default function FormationGrid({ onCardClick }) {
         <path d="M 550 1320 A 160 160 0 0 1 850 1320" stroke="#7ee2a8" strokeWidth="3" />
       </svg>
 
+
+      
+      {/* Drawing Layer moved outside 3D container */}
       {/* Slots overlay */}
       {slots.map((slot) => {
         const player = starters[slot.code];
@@ -56,7 +103,12 @@ export default function FormationGrid({ onCardClick }) {
           <div
             key={slot.code}
             className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
-            style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
+            style={{ 
+              left: `${100 - slot.x}%`, 
+              top: `${84 - slot.y}%`,
+              transform: 'translate(-50%, -50%) rotateX(-30deg)',
+              transformStyle: 'preserve-3d'
+            }}
           >
             <Droppable droppableId={`slot_${slot.code}`} type="player">
               {(provided, snapshot) => (
@@ -71,31 +123,51 @@ export default function FormationGrid({ onCardClick }) {
                       : "border border-dashed border-pitch-600 bg-pitch-900/30 hover:border-pitch-500"
                   }`}
                 >
+                  {formation === "Custom" && (
+                    <div 
+                      className="absolute -top-4 left-1/2 -translate-x-1/2 bg-black/60 text-white rounded p-1 cursor-move pointer-events-auto z-50 hover:bg-black/90 transition-colors"
+                      onPointerDown={(e) => handlePointerDown(e, slot.code)}
+                    >
+                      <Move size={14} />
+                    </div>
+                  )}
                   {player ? (
                     <Draggable draggableId={player._id} index={0}>
-                      {(dragProvided, dragSnapshot) => (
-                        <div
-                          ref={dragProvided.innerRef}
-                          {...dragProvided.draggableProps}
-                          {...dragProvided.dragHandleProps}
-                          onClick={() => onCardClick(player)}
-                          style={{
-                            ...dragProvided.draggableProps.style,
-                          }}
-                          className={`pitch-player-card ${
-                            dragSnapshot.isDragging ? "dragging" : ""
-                          }`}
-                        >
-                          <FutCard player={player} slotLabel={slot.code} />
-                        </div>
-                      )}
+                      {(dragProvided, dragSnapshot) => {
+                        const child = (
+                          <div
+                            ref={dragProvided.innerRef}
+                            {...dragProvided.draggableProps}
+                            {...dragProvided.dragHandleProps}
+                            onClick={(e) => onCardClick(player, slot.code, e)}
+                            style={{
+                              ...dragProvided.draggableProps.style,
+                            }}
+                            className={`pitch-player-card ${
+                              dragSnapshot.isDragging ? "dragging" : ""
+                            }`}
+                          >
+                            <FutCard player={player} slotLabel={slot.code} />
+                          </div>
+                        );
+                        
+                        // Escape the 3D transformed container while dragging to fix offset bugs
+                        if (dragSnapshot.isDragging) {
+                          return document.body ? createPortal(child, document.body) : child;
+                        }
+                        
+                        return child;
+                      }}
                     </Draggable>
                   ) : (
-                    <div className="flex flex-col items-center text-center p-2 pointer-events-none">
+                    <div 
+                      className="flex flex-col items-center text-center p-2 cursor-pointer"
+                      onClick={() => onEmptySlotClick && onEmptySlotClick(slot.code)}
+                    >
                       <div className="text-[10px] uppercase font-bold text-pitch-500 tracking-wider">
                         {slot.code}
                       </div>
-                      <div className="text-[18px] mt-1 text-pitch-600 opacity-60">➕</div>
+                      <div className="text-[18px] mt-1 text-pitch-600 opacity-60 hover:opacity-100 hover:scale-125 transition-all">➕</div>
                     </div>
                   )}
                   {provided.placeholder}
@@ -105,6 +177,11 @@ export default function FormationGrid({ onCardClick }) {
           </div>
         );
       })}
+      
+      </div> {/* End 3D Pitch Container */}
+      
+      {/* 2D Overlay Drawing Layer (Moved here so mouse coordinates map perfectly 1:1) */}
+      <DrawingLayer />
     </div>
   );
 }

@@ -13,8 +13,9 @@ const TacticalBoardSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     title: { type: String, required: true },
-    formationName: { type: String, required: true }, // e.g. "4-3-3"
+    formationName: { type: String, required: true }, // e.g. "4-3-3" or "Custom"
     lineup: [LineupItemSchema],
+    customSlots: { type: [{ code: String, x: Number, y: Number }], default: undefined },
     drawings: { type: mongoose.Schema.Types.Mixed, default: [] }, // array of stroke objects
     notes: { type: String, default: "" }
   },

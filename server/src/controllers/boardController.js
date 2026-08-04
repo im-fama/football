@@ -21,7 +21,7 @@ export async function getBoard(req, res, next) {
 
 export async function createBoard(req, res, next) {
   try {
-    const { title, formationName, lineup, drawings, notes } = req.body;
+    const { title, formationName, lineup, customSlots, drawings, notes } = req.body;
     if (!title || !formationName) {
       return res.status(400).json({ error: "Title and formationName are required." });
     }
@@ -31,6 +31,7 @@ export async function createBoard(req, res, next) {
       title,
       formationName,
       lineup: lineup || [],
+      customSlots,
       drawings: drawings || [],
       notes: notes || ""
     });
@@ -47,10 +48,11 @@ export async function updateBoard(req, res, next) {
     const board = await TacticalBoard.findOne({ _id: req.params.id, userId: req.user._id });
     if (!board) return res.status(404).json({ error: "Tactical board not found." });
 
-    const { title, formationName, lineup, drawings, notes } = req.body;
+    const { title, formationName, lineup, customSlots, drawings, notes } = req.body;
     if (title) board.title = title;
     if (formationName) board.formationName = formationName;
     if (lineup) board.lineup = lineup;
+    if (customSlots !== undefined) board.customSlots = customSlots;
     if (drawings) board.drawings = drawings;
     if (notes !== undefined) board.notes = notes;
 

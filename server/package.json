@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "dev:server": "nodemon src/server.js",
     "seed": "node ../database/seed.js"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "node-cache": "^5.1.2"
   },
   "devDependencies": {
+    "mongodb-memory-server": "^11.2.0",
     "nodemon": "^3.1.4"
   }
 }
