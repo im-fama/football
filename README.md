@@ -59,7 +59,7 @@ Log in from the avatar menu in the header with `coach@taqtiq.com` / `password123
 | Frontend | React 18 (Vite), Tailwind CSS, Framer Motion, `@hello-pangea/dnd`, Recharts, Lucide React |
 | Backend API | Node.js, Express, Mongoose, JWT (`jsonwebtoken` + `bcrypt`), Axios, Helmet |
 | Database | MongoDB (13 collections), embedded `mongodb-memory-server` auto-fallback |
-| Dataset | EA FC / sofifa CSV dumps — ~20.9k players, 745 clubs, 64 leagues, loaded on first start |
+| Dataset | EA FC / sofifa CSV dumps (~20.9k players) & StatsBomb Open Data (Match events & Passing Networks) |
 | ML Microservice | Python 3.10+, Flask, scikit-learn (GradientBoostingRegressor, RandomForest, KNN) |
 | Hosting | **Vercel** (free tier: frontend + serverless Express API) + MongoDB Atlas |
 
