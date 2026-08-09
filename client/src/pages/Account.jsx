@@ -239,9 +239,8 @@ export default function Account({ onClose }) {
   return (
     <div className="flex flex-col gap-5 py-2">
       {/* ── Profile Header Card ── */}
-      <div className="relative overflow-hidden rounded-2xl border border-pitch-700/50 bg-gradient-to-br from-pitch-900/90 to-pitch-950/90">
-        {/* Decorative gradient stripe */}
-        <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-brand-600/20 via-brand-500/10 to-brand-700/20" />
+      <div className="relative overflow-hidden rounded-2xl border border-pitch-700/50 bg-gradient-to-r from-brand-900/40 via-brand-800/25 to-pitch-900/90">
+        {/* Top accent line */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-500/60 to-transparent" />
 
         <div className="relative p-6 flex items-center gap-5">

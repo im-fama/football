@@ -3,6 +3,7 @@ import { Search, Star, Users, Scale, SlidersHorizontal, Brain, Plus, Trash2, Arr
 import FutCard from "../components/FutCard";
 import StatRadar from "../components/StatRadar";
 import PlayerModal from "../components/PlayerModal";
+import InlinePlayerSearch from "../components/InlinePlayerSearch";
 import api, { searchPlayers, getSimilarPlayers, getWatchlist, addToWatchlist, removeFromWatchlist } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -256,11 +257,40 @@ export default function Scouting() {
       {/* SIMILAR PLAYERS (KNN) TAB */}
       {activeTab === "similar" && (
         <div className="flex flex-col gap-6">
+          {/* Search bar to pick a target player */}
+          <div className="bg-pitch-900/60 border border-pitch-700/60 p-4 rounded-xl flex flex-col gap-2">
+            <p className="text-xs font-semibold text-pitch-400 uppercase tracking-wider">Search for a player to find similar matches</p>
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <InlinePlayerSearch
+                  placeholder="Type a player name to find similar players..."
+                  onSelect={(player) => handleFindSimilar(player)}
+                />
+              </div>
+              {targetPlayer && (
+                <button
+                  onClick={() => { setTargetPlayer(null); setSimilarResults([]); }}
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 bg-pitch-800 hover:bg-pulse-red/20 text-pitch-300 hover:text-pulse-red rounded-xl text-xs font-semibold transition-colors border border-pitch-700 hover:border-pulse-red/40"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Clear Selection
+                </button>
+              )}
+            </div>
+          </div>
+
           {targetPlayer ? (
             <div className="bg-pitch-900/60 border border-pitch-700/60 p-6 rounded-xl flex flex-col md:flex-row gap-6 items-center md:items-start">
               <div className="flex flex-col items-center">
                 <span className="text-xs font-semibold text-brand-400 uppercase tracking-widest mb-2">Target Profile</span>
                 <FutCard player={targetPlayer} showStats={true} />
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    onClick={() => { setTargetPlayer(null); setSimilarResults([]); }}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-pitch-800 hover:bg-pulse-red/20 text-pitch-300 hover:text-pulse-red rounded-lg text-xs font-semibold transition-colors border border-pitch-700 hover:border-pulse-red/30"
+                  >
+                    <Trash2 className="h-3 w-3" /> Clear Player
+                  </button>
+                </div>
               </div>
 
               <div className="flex-1 w-full">
@@ -306,9 +336,9 @@ export default function Scouting() {
               </div>
             </div>
           ) : (
-            <div className="text-center py-12 text-pitch-500 bg-pitch-900/30 border border-pitch-800/50 rounded-xl">
-              <Brain className="h-10 w-10 mx-auto mb-2 text-brand-400/60" />
-              <p className="text-sm">First select a player in the "Search Pool" tab and click "Similar".</p>
+            <div className="text-center py-8 text-pitch-500">
+              <Brain className="h-8 w-8 mx-auto mb-2 text-brand-400/40" />
+              <p className="text-xs">Search for a player above or use the "Similar" button in Search Pool.</p>
             </div>
           )}
         </div>
@@ -317,70 +347,306 @@ export default function Scouting() {
       {/* HEAD-TO-HEAD COMPARE TAB */}
       {activeTab === "compare" && (
         <div className="flex flex-col gap-6">
+          {(compareA || compareB) && (
+            <div className="flex justify-end">
+              <button
+                onClick={() => { setCompareA(null); setCompareB(null); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-pitch-800 hover:bg-pulse-red/20 text-pitch-300 hover:text-pulse-red rounded-xl text-xs font-semibold transition-colors border border-pitch-700 hover:border-pulse-red/40"
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Clear Comparison
+              </button>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             {/* Player A Selection */}
-            <div className="bg-pitch-900/60 border border-pitch-700/60 p-4 rounded-xl flex flex-col items-center gap-4">
-              <h3 className="font-display text-sm font-semibold uppercase tracking-wider text-pitch-400">Player A</h3>
+            <div className="bg-pitch-900/60 border border-pitch-700/60 p-4 rounded-xl flex flex-col items-center gap-4 relative">
+              <h3 className="font-display text-sm font-semibold uppercase tracking-wider text-brand-400">Player A</h3>
               {compareA ? (
                 <div className="flex flex-col items-center gap-3">
                   <FutCard player={compareA} showStats={true} />
-                  <button onClick={() => setCompareA(null)} className="text-xs text-pulse-red hover:underline">Change Player</button>
+                  <button
+                    onClick={() => setCompareA(null)}
+                    className="flex items-center gap-1 text-xs text-pulse-red hover:underline font-semibold"
+                  >
+                    <Trash2 className="h-3 w-3" /> Clear Player A
+                  </button>
                 </div>
               ) : (
-                <div className="py-8 text-center text-xs text-pitch-500">
-                  Select Player A from search results or squad.
+                <div className="w-full flex flex-col items-center gap-3 py-4">
+                  <InlinePlayerSearch
+                    placeholder="Search Player A..."
+                    onSelect={(player) => setCompareA(player)}
+                  />
+                  <p className="text-[10px] text-pitch-600">or select from Search Pool tab</p>
                 </div>
               )}
             </div>
 
             {/* Player B Selection */}
-            <div className="bg-pitch-900/60 border border-pitch-700/60 p-4 rounded-xl flex flex-col items-center gap-4">
-              <h3 className="font-display text-sm font-semibold uppercase tracking-wider text-pitch-400">Player B</h3>
+            <div className="bg-pitch-900/60 border border-pitch-700/60 p-4 rounded-xl flex flex-col items-center gap-4 relative">
+              <h3 className="font-display text-sm font-semibold uppercase tracking-wider text-sky-400">Player B</h3>
               {compareB ? (
                 <div className="flex flex-col items-center gap-3">
                   <FutCard player={compareB} showStats={true} />
-                  <button onClick={() => setCompareB(null)} className="text-xs text-pulse-red hover:underline">Change Player</button>
+                  <button
+                    onClick={() => setCompareB(null)}
+                    className="flex items-center gap-1 text-xs text-pulse-red hover:underline font-semibold"
+                  >
+                    <Trash2 className="h-3 w-3" /> Clear Player B
+                  </button>
                 </div>
               ) : (
-                <div className="py-8 text-center text-xs text-pitch-500">
-                  Select Player B from search results or squad.
+                <div className="w-full flex flex-col items-center gap-3 py-4">
+                  <InlinePlayerSearch
+                    placeholder="Search Player B..."
+                    onSelect={(player) => setCompareB(player)}
+                  />
+                  <p className="text-[10px] text-pitch-600">or select from Search Pool tab</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Comparison Stats & Radar */}
-          {compareA && compareB && (
-            <div className="bg-pitch-900/80 border border-pitch-700 p-6 rounded-xl flex flex-col md:flex-row gap-6">
-              <div className="flex-1">
-                <h4 className="font-display text-lg font-bold mb-4">Attribute Comparison Radar</h4>
-                <div className="h-64 border border-pitch-800 rounded-lg p-2 bg-pitch-950">
-                  <StatRadar stats={compareA.stats} compareStats={compareB.stats} />
+          {/* Extended Comparison Insights & Breakdown */}
+          {compareA && compareB && (() => {
+            const ovrA = compareA.computedRating || compareA.overallRating || 65;
+            const ovrB = compareB.computedRating || compareB.overallRating || 65;
+
+            const attrs = ["pace", "shooting", "passing", "dribbling", "defending", "physical"];
+            const attrLabels = {
+              pace: { name: "Pace / Speed", descA: "Faster sprint acceleration & recovery", descB: "Better burst speed in transition" },
+              shooting: { name: "Shooting / Finishing", descA: "Higher goal scoring precision & shot power", descB: "Sharper long range finishing in key zones" },
+              passing: { name: "Passing / Vision", descA: "Superior key passes & long range playmaking", descB: "Stronger short combination passing accuracy" },
+              dribbling: { name: "Dribbling / Agility", descA: "Tighter press resistance & close control", descB: "Higher agility in tight defensive block" },
+              defending: { name: "Defending / Tackling", descA: "Stronger defensive tackle rate & line recovery", descB: "Superior interception reading & positioning" },
+              physical: { name: "Physical / Stamina", descA: "Greater duel strength & aerial presence", descB: "Higher match stamina & physical resilience" }
+            };
+
+            let winsA = 0;
+            let winsB = 0;
+            attrs.forEach(attr => {
+              const valA = compareA.stats?.[attr] ?? 60;
+              const valB = compareB.stats?.[attr] ?? 60;
+              if (valA > valB) winsA++;
+              else if (valB > valA) winsB++;
+            });
+
+            return (
+              <div className="flex flex-col gap-6">
+                {/* ── Head-to-Head Analytical Verdict Banner ── */}
+                <div className="bg-gradient-to-r from-pitch-900 via-pitch-950 to-pitch-900 border border-pitch-700/80 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-brand-500/20 border border-brand-500/40 flex items-center justify-center text-brand-400 font-bold text-xl flex-shrink-0">
+                      ⚡
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-brand-400">Head-to-Head Scouting Verdict</span>
+                      <h3 className="font-display text-xl font-bold text-white mt-0.5">
+                        {ovrA > ovrB
+                          ? `${compareA.name} holds the overall tactical edge (+${ovrA - ovrB} OVR)`
+                          : ovrB > ovrA
+                          ? `${compareB.name} holds the overall tactical edge (+${ovrB - ovrA} OVR)`
+                          : `Equal Matchup — ${compareA.name} and ${compareB.name} share equal overall rating`}
+                      </h3>
+                      <p className="text-xs text-pitch-400 mt-1">
+                        {compareA.name} leads in <strong className="text-brand-400 font-semibold">{winsA}</strong> attribute categories, while {compareB.name} leads in <strong className="text-sky-400 font-semibold">{winsB}</strong> categories.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 bg-pitch-900/90 border border-pitch-800 px-4 py-3 rounded-xl flex-shrink-0">
+                    <div className="text-center px-3 border-r border-pitch-800">
+                      <span className="text-[10px] text-pitch-500 font-semibold uppercase block">Player A OVR</span>
+                      <span className="font-mono text-lg font-bold text-brand-400">{ovrA}</span>
+                    </div>
+                    <div className="text-center px-3">
+                      <span className="text-[10px] text-pitch-500 font-semibold uppercase block">Player B OVR</span>
+                      <span className="font-mono text-lg font-bold text-sky-400">{ovrB}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Attribute Comparison Radar & Breakdown Grid ── */}
+                <div className="bg-pitch-900/80 border border-pitch-700/80 p-6 rounded-2xl flex flex-col lg:flex-row gap-6 shadow-xl">
+                  <div className="lg:w-1/2 flex flex-col gap-4">
+                    <div className="flex items-center justify-between border-b border-pitch-800 pb-3">
+                      <h4 className="font-display text-lg font-bold text-white">Attribute Radar & Profile Visual</h4>
+                      <span className="text-xs text-pitch-400 font-semibold">6-Axis Metric Graph</span>
+                    </div>
+                    <div className="h-72 border border-pitch-800 rounded-xl p-3 bg-pitch-950/90 flex items-center justify-center">
+                      <StatRadar stats={compareA.stats} compareStats={compareB.stats} />
+                    </div>
+                    <div className="flex items-center justify-center gap-6 text-xs font-semibold pt-1">
+                      <div className="flex items-center gap-2 text-brand-400">
+                        <div className="w-3 h-3 rounded-full bg-brand-400" />
+                        <span>{compareA.name} ({ovrA} OVR)</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sky-400">
+                        <div className="w-3 h-3 rounded-full bg-sky-400" />
+                        <span>{compareB.name} ({ovrB} OVR)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="lg:w-1/2 flex flex-col gap-3">
+                    <div className="flex items-center justify-between border-b border-pitch-800 pb-3">
+                      <h4 className="font-display text-lg font-bold text-white">Detailed Attribute Breakdown</h4>
+                      <span className="text-xs text-pitch-400 font-semibold">Stat Deltas & Insights</span>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      {attrs.map((attr) => {
+                        const valA = compareA.stats?.[attr] ?? 60;
+                        const valB = compareB.stats?.[attr] ?? 60;
+                        const diff = valA - valB;
+                        const meta = attrLabels[attr] || { name: attr, descA: "", descB: "" };
+
+                        return (
+                          <div key={attr} className="bg-pitch-950/70 border border-pitch-800/60 p-3 rounded-xl flex flex-col gap-1.5 hover:border-pitch-700 transition-colors">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-bold text-white capitalize">{meta.name}</span>
+                              <div className="flex items-center gap-2 font-mono font-bold">
+                                <span className={valA >= valB ? "text-brand-400" : "text-pitch-400"}>
+                                  {compareA.name.split(" ").slice(-1)[0]}: {valA}
+                                </span>
+                                <span className="text-pitch-600">vs</span>
+                                <span className={valB >= valA ? "text-sky-400" : "text-pitch-400"}>
+                                  {compareB.name.split(" ").slice(-1)[0]}: {valB}
+                                </span>
+                                {diff !== 0 && (
+                                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ml-1 ${
+                                    diff > 0 ? "bg-brand-500/20 text-brand-300 border border-brand-500/30" : "bg-sky-500/20 text-sky-300 border border-sky-500/30"
+                                  }`}>
+                                    {diff > 0 ? `+${diff} A` : `+${Math.abs(diff)} B`}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Dual comparative bar */}
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 bg-pitch-900 h-2 rounded-full overflow-hidden flex">
+                                <div className="bg-brand-400 h-full transition-all" style={{ width: `${valA}%` }} />
+                              </div>
+                              <div className="flex-1 bg-pitch-900 h-2 rounded-full overflow-hidden flex justify-end">
+                                <div className="bg-sky-400 h-full transition-all" style={{ width: `${valB}%` }} />
+                              </div>
+                            </div>
+
+                            {/* Analytical explanation line */}
+                            <p className="text-[11px] text-pitch-400 mt-0.5">
+                              {diff > 0 ? (
+                                <span><strong className="text-brand-300 font-semibold">{compareA.name}:</strong> {meta.descA} (+{diff} pts higher).</span>
+                              ) : diff < 0 ? (
+                                <span><strong className="text-sky-300 font-semibold">{compareB.name}:</strong> {meta.descB} (+{Math.abs(diff)} pts higher).</span>
+                              ) : (
+                                <span>Evenly matched attribute rating across both players.</span>
+                              )}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Key Profile Metrics & Season Stats Comparison Table ── */}
+                <div className="bg-pitch-900/80 border border-pitch-700/80 p-6 rounded-2xl flex flex-col gap-4 shadow-xl">
+                  <div className="flex items-center justify-between border-b border-pitch-800 pb-3">
+                    <h4 className="font-display text-lg font-bold text-white">Season & Profile Metrics Comparison</h4>
+                    <span className="text-xs text-pitch-400 font-semibold">Match Statistics & Player Details</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Position & Role */}
+                    <div className="bg-pitch-950/70 border border-pitch-800/60 p-4 rounded-xl flex flex-col gap-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-pitch-500">Position / Primary Role</span>
+                      <div className="flex items-center justify-between mt-1 text-xs font-semibold">
+                        <span className="text-brand-400">{compareA.position || "N/A"} ({compareA.role || "Starter"})</span>
+                        <span className="text-pitch-600">vs</span>
+                        <span className="text-sky-400">{compareB.position || "N/A"} ({compareB.role || "Starter"})</span>
+                      </div>
+                    </div>
+
+                    {/* Age & Physical Build */}
+                    <div className="bg-pitch-950/70 border border-pitch-800/60 p-4 rounded-xl flex flex-col gap-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-pitch-500">Age / Experience Curve</span>
+                      <div className="flex items-center justify-between mt-1 text-xs font-semibold">
+                        <span className="text-brand-400">{compareA.age || 25} yrs ({compareA.nationality || "Int"})</span>
+                        <span className="text-pitch-600">vs</span>
+                        <span className="text-sky-400">{compareB.age || 25} yrs ({compareB.nationality || "Int"})</span>
+                      </div>
+                    </div>
+
+                    {/* Matches Played */}
+                    <div className="bg-pitch-950/70 border border-pitch-800/60 p-4 rounded-xl flex flex-col gap-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-pitch-500">Matches Played</span>
+                      <div className="flex items-center justify-between mt-1 text-xs font-semibold font-mono">
+                        <span className="text-brand-400">{compareA.stats?.matches ?? 0} matches</span>
+                        <span className="text-pitch-600">vs</span>
+                        <span className="text-sky-400">{compareB.stats?.matches ?? 0} matches</span>
+                      </div>
+                    </div>
+
+                    {/* Goal Contributions (Goals + Assists) */}
+                    <div className="bg-pitch-950/70 border border-pitch-800/60 p-4 rounded-xl flex flex-col gap-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-pitch-500">Goal Contributions (G+A)</span>
+                      <div className="flex items-center justify-between mt-1 text-xs font-semibold font-mono">
+                        <span className="text-brand-400">
+                          {(compareA.stats?.goals ?? 0) + (compareA.stats?.assists ?? 0)} ({compareA.stats?.goals ?? 0}G, {compareA.stats?.assists ?? 0}A)
+                        </span>
+                        <span className="text-pitch-600">vs</span>
+                        <span className="text-sky-400">
+                          {(compareB.stats?.goals ?? 0) + (compareB.stats?.assists ?? 0)} ({compareB.stats?.goals ?? 0}G, {compareB.stats?.assists ?? 0}A)
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Pass Accuracy % */}
+                    <div className="bg-pitch-950/70 border border-pitch-800/60 p-4 rounded-xl flex flex-col gap-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-pitch-500">Pass Accuracy %</span>
+                      <div className="flex items-center justify-between mt-1 text-xs font-semibold font-mono">
+                        <span className="text-brand-400">{compareA.stats?.passAccuracy ?? 75}%</span>
+                        <span className="text-pitch-600">vs</span>
+                        <span className="text-sky-400">{compareB.stats?.passAccuracy ?? 75}%</span>
+                      </div>
+                    </div>
+
+                    {/* Defensive Recoveries / Tackles */}
+                    <div className="bg-pitch-950/70 border border-pitch-800/60 p-4 rounded-xl flex flex-col gap-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-pitch-500">Tackles & Interceptions</span>
+                      <div className="flex items-center justify-between mt-1 text-xs font-semibold font-mono">
+                        <span className="text-brand-400">{(compareA.stats?.tackles ?? 0) + (compareA.stats?.interceptions ?? 0)} actions</span>
+                        <span className="text-pitch-600">vs</span>
+                        <span className="text-sky-400">{(compareB.stats?.tackles ?? 0) + (compareB.stats?.interceptions ?? 0)} actions</span>
+                      </div>
+                    </div>
+
+                    {/* Current Team / Club */}
+                    <div className="bg-pitch-950/70 border border-pitch-800/60 p-4 rounded-xl flex flex-col gap-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-pitch-500">Current Club / Squad</span>
+                      <div className="flex items-center justify-between mt-1 text-xs font-semibold">
+                        <span className="text-brand-400 truncate max-w-[120px]">{compareA.team || "FC Torino"}</span>
+                        <span className="text-pitch-600">vs</span>
+                        <span className="text-sky-400 truncate max-w-[120px]">{compareB.team || "FC Torino"}</span>
+                      </div>
+                    </div>
+
+                    {/* Fitness / Stamina */}
+                    <div className="bg-pitch-950/70 border border-pitch-800/60 p-4 rounded-xl flex flex-col gap-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-pitch-500">Condition & Fitness</span>
+                      <div className="flex items-center justify-between mt-1 text-xs font-semibold font-mono">
+                        <span className="text-brand-400">{compareA.fitness ?? 90}% fit</span>
+                        <span className="text-pitch-600">vs</span>
+                        <span className="text-sky-400">{compareB.fitness ?? 90}% fit</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <div className="flex-1 flex flex-col justify-center gap-3">
-                <h4 className="font-display text-lg font-bold">Attribute Breakdown</h4>
-                {["pace", "shooting", "passing", "dribbling", "defending", "physical"].map((attr) => {
-                  const valA = compareA.stats?.[attr] ?? 60;
-                  const valB = compareB.stats?.[attr] ?? 60;
-                  return (
-                    <div key={attr} className="flex items-center text-xs gap-3">
-                      <span className={`w-8 font-mono text-right ${valA > valB ? "text-brand-400 font-bold" : "text-pitch-400"}`}>{valA}</span>
-                      <div className="flex-1 bg-pitch-950 h-2 rounded-full overflow-hidden flex">
-                        <div className="bg-brand-400 h-full" style={{ width: `${valA}%` }} />
-                      </div>
-                      <span className="w-12 text-center uppercase font-bold text-pitch-500">{attr.slice(0, 3)}</span>
-                      <div className="flex-1 bg-pitch-950 h-2 rounded-full overflow-hidden flex justify-end">
-                        <div className="bg-sky-400 h-full" style={{ width: `${valB}%` }} />
-                      </div>
-                      <span className={`w-8 font-mono ${valB > valA ? "text-sky-400 font-bold" : "text-pitch-400"}`}>{valB}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       )}
 
