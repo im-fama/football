@@ -8,6 +8,8 @@ import VerticalSidebar from "../components/sidebar/VerticalSidebar";
 import PlayerModal from "../components/PlayerModal";
 import PlayerSearchModal from "../components/modal/PlayerSearchModal";
 import PlayerContextMenu from "../components/pitch/PlayerContextMenu";
+import PlayerImagePickerModal from "../components/modal/PlayerImagePickerModal";
+import ConfirmModal from "../components/modal/ConfirmModal";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function PitchView() {
@@ -69,6 +71,8 @@ export default function PitchView() {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
   const [searchSlot, setSearchSlot] = useState(null);
+  const [photoTargetPlayer, setPhotoTargetPlayer] = useState(null);
+  const [confirmModalConfig, setConfirmModalConfig] = useState(null);
   
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
 
@@ -132,14 +136,49 @@ export default function PitchView() {
 
     if (action === 'stats') {
       setSelectedPlayer(player);
+    } else if (action === 'photo') {
+      setPhotoTargetPlayer({ player, slotCode });
     } else if (action === 'remove') {
-      removeStarter(slotCode);
+      setConfirmModalConfig({
+        isOpen: true,
+        title: "Remove Starter",
+        message: `Are you sure you want to remove ${player.name || 'this player'} from ${slotCode}?`,
+        confirmText: "Remove",
+        variant: "danger",
+        onConfirm: () => {
+          removeStarter(slotCode);
+          setConfirmModalConfig(null);
+        }
+      });
     } else if (action === 'swap') {
-      // Just dim out others or show a toast saying "drag to swap". 
-      // A full 2-click swap mechanic would take more state. Let's just remove for now or show toast.
-      // Easiest is to just rely on drag & drop for swapping, but we can also trigger a visual state if we want.
       alert("Drag and drop a player to swap positions!");
     }
+  };
+
+  const handleSelectPlayerImage = (selectedImagePlayer) => {
+    if (!photoTargetPlayer) return;
+    const newThumbnail = selectedImagePlayer.thumbnail || selectedImagePlayer.photoUrl;
+    if (!newThumbnail) return;
+
+    setConfirmModalConfig({
+      isOpen: true,
+      title: "Update Player Image",
+      message: `Are you sure you want to update ${photoTargetPlayer.player.name}'s picture?`,
+      confirmText: "Update Picture",
+      variant: "info",
+      onConfirm: () => {
+        setStarters((prev) => ({
+          ...prev,
+          [photoTargetPlayer.slotCode]: {
+            ...prev[photoTargetPlayer.slotCode],
+            thumbnail: newThumbnail,
+            photoUrl: newThumbnail
+          }
+        }));
+        setPhotoTargetPlayer(null);
+        setConfirmModalConfig(null);
+      }
+    });
   };
 
   return (
@@ -257,6 +296,24 @@ export default function PitchView() {
           onAction={handleContextMenuAction}
         />
       )}
+
+      {photoTargetPlayer && (
+        <PlayerImagePickerModal
+          onSelectPlayerImage={handleSelectPlayerImage}
+          onClose={() => setPhotoTargetPlayer(null)}
+        />
+      )}
+
+      <ConfirmModal
+        isOpen={!!confirmModalConfig}
+        title={confirmModalConfig?.title}
+        message={confirmModalConfig?.message}
+        confirmText={confirmModalConfig?.confirmText}
+        cancelText="Cancel"
+        variant={confirmModalConfig?.variant || "danger"}
+        onConfirm={confirmModalConfig?.onConfirm}
+        onCancel={() => setConfirmModalConfig(null)}
+      />
     </div>
     </DragDropContext>
   );

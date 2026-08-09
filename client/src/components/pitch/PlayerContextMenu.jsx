@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BarChart2, RefreshCw, UserMinus, X } from "lucide-react";
+import { BarChart2, RefreshCw, UserMinus, Camera, X } from "lucide-react";
 
 export default function PlayerContextMenu({ player, slotCode, position, onClose, onAction }) {
   const menuRef = useRef(null);
@@ -17,9 +17,10 @@ export default function PlayerContextMenu({ player, slotCode, position, onClose,
 
   if (!player) return null;
 
-  const radius = 65; // Distance from center
+  const radius = 70; // Distance from center
   const actions = [
     { id: 'stats', icon: BarChart2, label: 'Stats', color: 'text-brand-400', bgHover: 'hover:bg-brand-500/20', borderHover: 'hover:border-brand-500/50' },
+    { id: 'photo', icon: Camera, label: 'Change Photo', color: 'text-cyan-400', bgHover: 'hover:bg-cyan-500/20', borderHover: 'hover:border-cyan-500/50' },
     { id: 'swap', icon: RefreshCw, label: 'Swap', color: 'text-amber-400', bgHover: 'hover:bg-amber-500/20', borderHover: 'hover:border-amber-500/50' },
     { id: 'remove', icon: UserMinus, label: 'Remove', color: 'text-pulse-red', bgHover: 'hover:bg-pulse-red/20', borderHover: 'hover:border-pulse-red/50' }
   ];

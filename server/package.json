@@ -4,6 +4,10 @@
   "description": "Express API layer: fetches/caches football data in MongoDB and proxies ML requests to the Flask service.",
   "type": "module",
   "main": "src/server.js",
+  "engines": {
+    "node": ">=18 <25",
+    "npm": ">=9"
+  },
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",

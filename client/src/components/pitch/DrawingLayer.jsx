@@ -1,8 +1,57 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { useSquad } from "../../context/SquadContext";
 
+const distanceBetween = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+
+const isPointNearStroke = (point, stroke, threshold = 18) => {
+  const points = stroke.points;
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const a = points[i];
+    const b = points[i + 1];
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const l2 = dx * dx + dy * dy;
+    if (l2 === 0) {
+      if (distanceBetween(point, a) <= threshold) return true;
+      continue;
+    }
+    const t = Math.max(0, Math.min(1, ((point.x - a.x) * dx + (point.y - a.y) * dy) / l2));
+    const projection = { x: a.x + t * dx, y: a.y + t * dy };
+    if (distanceBetween(point, projection) <= threshold) return true;
+  }
+  return points.length === 1 && distanceBetween(point, points[0]) <= threshold;
+};
+
+const splitStrokeByEraser = (stroke, eraserPoints, threshold = 14) => {
+  const segments = [];
+  let currentSegment = [];
+
+  const isErasedPoint = (point) => eraserPoints.some((eraserPoint) => distanceBetween(point, eraserPoint) <= threshold);
+
+  stroke.points.forEach((point) => {
+    if (isErasedPoint(point)) {
+      if (currentSegment.length > 1) {
+        segments.push(currentSegment);
+      }
+      currentSegment = [];
+    } else {
+      currentSegment.push(point);
+    }
+  });
+
+  if (currentSegment.length > 1) {
+    segments.push(currentSegment);
+  }
+
+  return segments.map((points, index) => ({
+    ...stroke,
+    id: `${stroke.id}-split-${index}`,
+    points
+  }));
+};
+
 export default function DrawingLayer() {
-  const { drawings, setDrawings, drawingMode, strokeColor } = useSquad();
+  const { drawings, setDrawings, drawingMode, strokeColor, strokeWidth, setStrokeColor, setDrawingMode } = useSquad();
   const svgRef = useRef(null);
   const [currentStroke, setCurrentStroke] = useState(null);
   // Date.now() alone collides for two strokes drawn in the same millisecond,
@@ -18,31 +67,78 @@ export default function DrawingLayer() {
     return { x, y };
   };
 
+  const eraseStrokeAtPoint = (point) => {
+    setDrawings((prev) => prev.filter((stroke) => !isPointNearStroke(point, stroke, 18)));
+  };
+
+  const eraseWithPath = (eraserPoints) => {
+    setDrawings((prev) => {
+      const updated = [];
+      prev.forEach((stroke) => {
+        if (!isPointNearStroke(eraserPoints[0], stroke, 18) && !eraserPoints.some((point) => isPointNearStroke(point, stroke, 18))) {
+          updated.push(stroke);
+          return;
+        }
+
+        const split = splitStrokeByEraser(stroke, eraserPoints, 16);
+        split.forEach((piece) => updated.push(piece));
+      });
+      return updated;
+    });
+  };
+
+  const pickColorAtPoint = (point) => {
+    const found = drawings.find((stroke) => isPointNearStroke(point, stroke, 18));
+    if (found) {
+      setStrokeColor(found.color);
+      setDrawingMode(null);
+    }
+  };
+
   const handlePointerDown = (e) => {
     if (!drawingMode) return;
     e.preventDefault();
     const { x, y } = getCoordinates(e);
-    
+
+    if (drawingMode === "eyedropper") {
+      pickColorAtPoint({ x, y });
+      return;
+    }
+
+    if (drawingMode === "strokeEraser") {
+      eraseStrokeAtPoint({ x, y });
+      return;
+    }
+
     setCurrentStroke({
       id: `${Date.now()}-${strokeSeq.current++}`,
       tool: drawingMode,
       color: strokeColor,
+      width: strokeWidth,
       points: [{ x, y }],
       opacity: 1
     });
   };
 
   const handlePointerMove = (e) => {
+    if (drawingMode === "strokeEraser") {
+      return;
+    }
+
+    const { x, y } = getCoordinates(e);
     if (!currentStroke) return;
     e.preventDefault();
-    const { x, y } = getCoordinates(e);
 
     setCurrentStroke((prev) => {
       if (!prev) return null;
-      return {
+      const next = {
         ...prev,
         points: [...prev.points, { x, y }]
       };
+      if (prev.tool === "eraser") {
+        eraseWithPath(next.points);
+      }
+      return next;
     });
   };
 
@@ -51,10 +147,15 @@ export default function DrawingLayer() {
     e.preventDefault();
 
     const finalizedStroke = { ...currentStroke };
-    setDrawings((prev) => [...prev, finalizedStroke]);
     setCurrentStroke(null);
 
-    // If it's a laser pen, trigger fade out
+    if (finalizedStroke.tool === "eraser") {
+      eraseWithPath(finalizedStroke.points);
+      return;
+    }
+
+    setDrawings((prev) => [...prev, finalizedStroke]);
+
     if (finalizedStroke.tool === "laser") {
       const strokeId = finalizedStroke.id;
 
@@ -76,6 +177,15 @@ export default function DrawingLayer() {
   const pointsToPath = (points) => {
     if (!points || points.length === 0) return "";
     return points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+  };
+
+  const getLaserStrokeWidths = (width) => {
+    const base = Math.max(2, width || 4);
+    return {
+      outer: base + 10,
+      mid: Math.max(4, base + 4),
+      inner: base
+    };
   };
 
   return (
@@ -111,13 +221,14 @@ export default function DrawingLayer() {
       {/* Existing strokes */}
       {drawings.map((stroke) => {
         if (stroke.tool === "laser") {
+          const widths = getLaserStrokeWidths(stroke.width);
           return (
             <g key={stroke.id} style={{ opacity: stroke.opacity, transition: "opacity 0.5s ease" }}>
               <path
                 d={pointsToPath(stroke.points)}
                 fill="none"
                 stroke={stroke.color}
-                strokeWidth={16}
+                strokeWidth={widths.outer}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 filter="url(#laser-glow)"
@@ -128,7 +239,7 @@ export default function DrawingLayer() {
                 d={pointsToPath(stroke.points)}
                 fill="none"
                 stroke="#ffffff"
-                strokeWidth={8}
+                strokeWidth={widths.mid}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 opacity={0.9}
@@ -137,7 +248,7 @@ export default function DrawingLayer() {
                 d={pointsToPath(stroke.points)}
                 fill="none"
                 stroke={stroke.color}
-                strokeWidth={4}
+                strokeWidth={widths.inner}
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -150,7 +261,7 @@ export default function DrawingLayer() {
             d={pointsToPath(stroke.points)}
             fill="none"
             stroke={stroke.color}
-            strokeWidth={4}
+            strokeWidth={stroke.width || 4}
             strokeLinecap="round"
             strokeLinejoin="round"
             style={{ opacity: stroke.opacity, transition: "opacity 0.5s ease" }}
@@ -161,40 +272,47 @@ export default function DrawingLayer() {
       {/* Current drawing stroke */}
       {currentStroke && currentStroke.tool === "laser" ? (
         <g>
-          <path
-            d={pointsToPath(currentStroke.points)}
-            fill="none"
-            stroke={currentStroke.color}
-            strokeWidth={16}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            filter="url(#laser-glow)"
-            opacity={0.8}
-          />
-          <path
-            d={pointsToPath(currentStroke.points)}
-            fill="none"
-            stroke="#ffffff"
-            strokeWidth={8}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity={0.9}
-          />
-          <path
-            d={pointsToPath(currentStroke.points)}
-            fill="none"
-            stroke={currentStroke.color}
-            strokeWidth={4}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          {(() => {
+            const widths = getLaserStrokeWidths(currentStroke.width);
+            return (
+              <>
+                <path
+                  d={pointsToPath(currentStroke.points)}
+                  fill="none"
+                  stroke={currentStroke.color}
+                  strokeWidth={widths.outer}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  filter="url(#laser-glow)"
+                  opacity={0.8}
+                />
+                <path
+                  d={pointsToPath(currentStroke.points)}
+                  fill="none"
+                  stroke="#ffffff"
+                  strokeWidth={widths.mid}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  opacity={0.9}
+                />
+                <path
+                  d={pointsToPath(currentStroke.points)}
+                  fill="none"
+                  stroke={currentStroke.color}
+                  strokeWidth={widths.inner}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </>
+            );
+          })()}
         </g>
-      ) : currentStroke ? (
+      ) : currentStroke && currentStroke.tool !== "eraser" ? (
         <path
           d={pointsToPath(currentStroke.points)}
           fill="none"
           stroke={currentStroke.color}
-          strokeWidth={4}
+          strokeWidth={currentStroke.width || 4}
           strokeLinecap="round"
           strokeLinejoin="round"
         />

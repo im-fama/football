@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Routes, Route, NavLink, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Routes, Route, NavLink, Link, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { SquadProvider } from "./context/SquadContext";
 import PitchView from "./pages/PitchView";
@@ -12,9 +12,20 @@ import { Shield, Layout, BarChart2, Search, User, X, PlusCircle } from "lucide-r
 
 function Header({ onOpenAccount }) {
   const { user } = useAuth();
+  const location = useLocation();
+  const [tabLoading, setTabLoading] = useState(false);
+
+  useEffect(() => {
+    setTabLoading(true);
+    const timer = setTimeout(() => setTabLoading(false), 350);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
 
   return (
-    <header className="bg-pitch-950/90 backdrop-blur-md border-b border-pitch-800/80 px-6 py-3 sticky top-0 z-40">
+    <header className="bg-pitch-950/90 backdrop-blur-md border-b border-pitch-800/80 px-6 py-3 sticky top-0 z-40 relative">
+      {tabLoading && (
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-500 via-brand-300 to-brand-500 animate-pulse" />
+      )}
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Brand */}
         <Link to="/" className="flex items-center gap-2 group">
@@ -124,17 +135,23 @@ export default function App() {
             </DatasetGate>
           </main>
 
+
           {/* Account Modal Overlay */}
           {showAccountModal && (
-            <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
-              <div className="relative w-full max-w-4xl max-h-[90vh] bg-pitch-950 border border-pitch-700 rounded-2xl flex flex-col overflow-hidden shadow-2xl">
+            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-lg flex items-center justify-center p-4" onClick={() => setShowAccountModal(false)}>
+              <div
+                className="relative w-full max-w-2xl max-h-[85vh] bg-pitch-950 border border-pitch-700/60 rounded-2xl flex flex-col overflow-hidden shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Top gradient accent */}
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-500/70 to-transparent" />
                 <button
                   onClick={() => setShowAccountModal(false)}
-                  className="absolute top-4 right-4 z-10 bg-pitch-800 hover:bg-pitch-700 p-2 rounded-full text-pitch-400 hover:text-white transition-colors"
+                  className="absolute top-3 right-3 z-10 bg-pitch-800/80 hover:bg-pitch-700 p-2 rounded-xl text-pitch-400 hover:text-white transition-all"
                 >
                   <X className="h-4 w-4" />
                 </button>
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto scrollbar-thin px-6 py-4">
                   <Account onClose={() => setShowAccountModal(false)} />
                 </div>
               </div>

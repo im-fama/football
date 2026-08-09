@@ -157,5 +157,117 @@ def predict_tactics():
     return jsonify(suggestions=suggestions)
 
 
+# ═══════════════════════════════════════════════════════════════════════
+# Phase 2: SofaScore / FotMob Visual Layer Endpoints
+# ═══════════════════════════════════════════════════════════════════════
+
+from visual_scraper import get_match_heatmap, get_match_shotmap
+
+
+@app.post("/visuals/match-heatmap")
+def visuals_heatmap():
+    """
+    Fetch match heatmap xy coordinate arrays.
+    Body: { "match_id": 12345, "player_id": "optional" }
+    """
+    body = request.get_json(force=True) or {}
+    match_id = body.get("match_id", "")
+    player_id = body.get("player_id")
+
+    if not match_id:
+        return jsonify(error="match_id required"), 400
+
+    zones = get_match_heatmap(match_id, player_id)
+    return jsonify(zones=zones, source="visual_scraper")
+
+
+@app.post("/visuals/match-shotmap")
+def visuals_shotmap():
+    """
+    Fetch match shot map xy coordinates with xG values.
+    Body: { "match_id": 12345 }
+    """
+    body = request.get_json(force=True) or {}
+    match_id = body.get("match_id", "")
+
+    if not match_id:
+        return jsonify(error="match_id required"), 400
+
+    shots = get_match_shotmap(match_id)
+    return jsonify(shots=shots, source="visual_scraper")
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Phase 3: StatsBomb Tactical Research Lab Endpoints
+# ═══════════════════════════════════════════════════════════════════════
+
+from statsbomb_service import (
+    get_competitions,
+    get_matches,
+    get_passing_network as sb_passing_network,
+    get_pressure_map,
+)
+
+
+@app.get("/statsbomb/competitions")
+def sb_competitions():
+    """List available StatsBomb open-access competitions."""
+    result = get_competitions()
+    return jsonify(result)
+
+
+@app.get("/statsbomb/matches")
+def sb_matches():
+    """
+    List matches for a competition/season.
+    Query: ?competition_id=43&season_id=106
+    """
+    comp_id = request.args.get("competition_id", type=int)
+    season_id = request.args.get("season_id", type=int)
+
+    if not comp_id or not season_id:
+        return jsonify(error="competition_id and season_id required"), 400
+
+    result = get_matches(comp_id, season_id)
+    return jsonify(result)
+
+
+@app.post("/statsbomb/passing-network")
+def sb_passing_network_endpoint():
+    """
+    Deep tactical passing network analysis.
+    Body: { "match_id": 3788741, "team": "Argentina" }
+    Returns nodes (avg player positions), edges (pair pass counts with
+    line-thickness vectors), and aggregate stats.
+    """
+    body = request.get_json(force=True) or {}
+    match_id = body.get("match_id")
+    team = body.get("team")
+
+    if not match_id:
+        return jsonify(error="match_id required"), 400
+
+    result = sb_passing_network(match_id, team_name=team)
+    return jsonify(result)
+
+
+@app.post("/statsbomb/pressure-map")
+def sb_pressure_map():
+    """
+    Player pressure event positions for positioning analysis.
+    Body: { "match_id": 3788741, "team": "Argentina" }
+    """
+    body = request.get_json(force=True) or {}
+    match_id = body.get("match_id")
+    team = body.get("team")
+
+    if not match_id:
+        return jsonify(error="match_id required"), 400
+
+    result = get_pressure_map(match_id, team_name=team)
+    return jsonify(result)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)
+

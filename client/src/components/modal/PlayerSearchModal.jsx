@@ -58,7 +58,7 @@ export default function PlayerSearchModal({ targetSlot, onClose, onSelect }) {
         <div className="flex items-center justify-between p-6 border-b border-pitch-800 bg-pitch-950">
           <div>
             <h2 className="font-display text-2xl font-bold tracking-widest text-white uppercase">
-              Club Search
+              Club Player Selection
             </h2>
             {targetSlot && (
               <p className="text-pitch-400 text-sm mt-1">
@@ -66,12 +66,14 @@ export default function PlayerSearchModal({ targetSlot, onClose, onSelect }) {
               </p>
             )}
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/60 hover:text-white"
-          >
-            <X size={24} />
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={onClose}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/60 hover:text-white"
+            >
+              <X size={24} />
+            </button>
+          </div>
         </div>
 
         {/* Toolbar */}

@@ -20,13 +20,14 @@ export default function BenchRail({ onCardClick }) {
 
   return (
     <div className={`absolute bottom-0 w-full z-20 select-none pointer-events-none transition-transform duration-300 ${benchOpen ? 'translate-y-0' : 'translate-y-[85%]'}`}>
-      <div className="w-full flex justify-center mb-2">
+      <div className="w-full relative flex justify-end px-8">
         <button 
           onClick={() => setBenchOpen(!benchOpen)}
-          className="bg-black/60 text-white px-6 py-1 rounded-t-xl border border-b-0 border-white/20 hover:bg-black/90 transition-all pointer-events-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]"
+          className="absolute -top-7 right-8 bg-pitch-900/90 text-white px-4 py-1.5 rounded-t-xl border border-b-0 border-white/20 hover:bg-black transition-all pointer-events-auto shadow-lg flex items-center gap-1 text-xs font-semibold"
           title="Toggle Bench"
         >
-          {benchOpen ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+          <span>Bench</span>
+          {benchOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
         </button>
       </div>
       

@@ -4,6 +4,10 @@
   "description": "taqtiq - Football Decision & Squad Management Platform",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=18 <25",
+    "npm": ">=9"
+  },
   "scripts": {
     "setup": "npm install && npm --prefix server install && npm --prefix client install && npm --prefix database install",
     "dev": "concurrently -n api,web -c green,cyan \"npm:dev:server\" \"npm:dev:client\"",

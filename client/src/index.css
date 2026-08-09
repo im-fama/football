@@ -634,6 +634,22 @@
 }
 .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
 
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar,
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 /* Pitch specific card scaling */
 .pitch-player-card {
   transform: scale(0.75);

@@ -16,8 +16,10 @@ router.use("/auth", authRoutes);
 // Leagues / Teams
 router.get("/leagues", leagueCtrl.listLeagues);
 router.get("/teams", leagueCtrl.listTeamsByLeague);
+router.get("/teams/custom", leagueCtrl.listCustomTeams);
 router.get("/leagues/:id/teams", leagueCtrl.listTeamsByLeague);
 router.post("/teams", leagueCtrl.createTeam);
+router.delete("/teams/:id", leagueCtrl.deleteTeam);
 
 // Admin — dataset loading. The load runs in the background; poll /admin/status.
 router.post("/admin/seed-kaggle", async (req, res, next) => {
@@ -126,4 +128,152 @@ router.get("/watchlist", protect, watchlistCtrl.listWatchlist);
 router.post("/watchlist", protect, watchlistCtrl.addToWatchlist);
 router.delete("/watchlist/:playerId", protect, watchlistCtrl.removeFromWatchlist);
 
+// ═══════════════════════════════════════════════════════════════════════
+// Phase 1: API-Football Core Infrastructure Routes
+// ═══════════════════════════════════════════════════════════════════════
+
+router.get("/football/standings/:leagueId", async (req, res) => {
+  try {
+    const { fetchStandings } = await import("../services/apiFootballService.js");
+    const leagueId = parseInt(req.params.leagueId) || 39;
+    const season = parseInt(req.query.season) || new Date().getFullYear();
+    const data = await fetchStandings(leagueId, season);
+    res.json(data);
+  } catch (err) {
+    console.error("Standings route error:", err);
+    res.status(500).json({ error: "Failed to fetch standings" });
+  }
+});
+
+router.get("/football/fixtures/:leagueId", async (req, res) => {
+  try {
+    const { fetchFixtures } = await import("../services/apiFootballService.js");
+    const leagueId = parseInt(req.params.leagueId) || 39;
+    const season = parseInt(req.query.season) || new Date().getFullYear();
+    const data = await fetchFixtures(leagueId, season);
+    res.json(data);
+  } catch (err) {
+    console.error("Fixtures route error:", err);
+    res.status(500).json({ error: "Failed to fetch fixtures" });
+  }
+});
+
+router.get("/football/leagues", async (req, res) => {
+  try {
+    const { TOP_LEAGUES } = await import("../services/apiFootballService.js");
+    res.json({ leagues: TOP_LEAGUES });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch API-Football leagues" });
+  }
+});
+
+router.post("/football/sync", async (req, res) => {
+  try {
+    const { syncMasterData } = await import("../services/apiFootballService.js");
+    const result = await syncMasterData();
+    res.json({ message: "Sync complete", ...result });
+  } catch (err) {
+    console.error("Sync route error:", err);
+    res.status(500).json({ error: "Sync failed" });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// Phase 2 & 3: ML Service Proxy Routes (StatsBomb + Visual Scraper)
+// ═══════════════════════════════════════════════════════════════════════
+
+const ML_URL = process.env.ML_SERVICE_URL || process.env.ML_URL || "http://127.0.0.1:5001";
+
+// StatsBomb: Competitions
+router.get("/statsbomb/competitions", async (req, res) => {
+  try {
+    const response = await fetch(`${ML_URL}/statsbomb/competitions`);
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error("StatsBomb competitions proxy error:", err.message);
+    res.status(500).json({ error: "Failed to fetch StatsBomb competitions" });
+  }
+});
+
+// StatsBomb: Matches for a competition/season
+router.get("/statsbomb/matches", async (req, res) => {
+  try {
+    const { competition_id, season_id } = req.query;
+    const response = await fetch(
+      `${ML_URL}/statsbomb/matches?competition_id=${competition_id}&season_id=${season_id}`
+    );
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error("StatsBomb matches proxy error:", err.message);
+    res.status(500).json({ error: "Failed to fetch StatsBomb matches" });
+  }
+});
+
+// StatsBomb: Passing Network
+router.post("/statsbomb/passing-network", async (req, res) => {
+  try {
+    const response = await fetch(`${ML_URL}/statsbomb/passing-network`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body),
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error("StatsBomb passing-network proxy error:", err.message);
+    res.status(500).json({ error: "Failed to fetch passing network" });
+  }
+});
+
+// StatsBomb: Pressure Map
+router.post("/statsbomb/pressure-map", async (req, res) => {
+  try {
+    const response = await fetch(`${ML_URL}/statsbomb/pressure-map`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body),
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error("StatsBomb pressure-map proxy error:", err.message);
+    res.status(500).json({ error: "Failed to fetch pressure map" });
+  }
+});
+
+// Visual Scraper: Match Heatmap
+router.post("/visuals/match-heatmap", async (req, res) => {
+  try {
+    const response = await fetch(`${ML_URL}/visuals/match-heatmap`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body),
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error("Visual heatmap proxy error:", err.message);
+    res.status(500).json({ error: "Failed to fetch match heatmap" });
+  }
+});
+
+// Visual Scraper: Match Shotmap
+router.post("/visuals/match-shotmap", async (req, res) => {
+  try {
+    const response = await fetch(`${ML_URL}/visuals/match-shotmap`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body),
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error("Visual shotmap proxy error:", err.message);
+    res.status(500).json({ error: "Failed to fetch match shotmap" });
+  }
+});
+
 export default router;
+

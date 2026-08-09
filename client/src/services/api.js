@@ -5,12 +5,16 @@ const api = axios.create({ baseURL: "/api", timeout: 12000 });
 // Leagues / Teams
 export const getLeagues = () => api.get("/leagues").then((r) => r.data);
 export const getTeams = (league) => api.get("/teams", { params: { league } }).then((r) => r.data);
+export const getCustomTeams = () => api.get("/teams/custom").then((r) => r.data);
+export const createTeam = (team) => api.post("/teams", team).then((r) => r.data);
+export const deleteTeam = (id) => api.delete(`/teams/${id}`).then((r) => r.data);
 
 // Dataset bootstrap
 export const getDatasetStatus = () => api.get("/admin/status").then((r) => r.data);
 export const startDatasetLoad = () => api.post("/admin/seed-kaggle").then((r) => r.data);
 
 // Players
+export const createPlayer = (player) => api.post("/players", player).then((r) => r.data);
 export const getPlayersByTeam = (teamId) => api.get("/players", { params: { teamId } }).then((r) => r.data);
 export const searchPlayers = (q, opts = {}) =>
   api.get("/players/search", { params: { q, ...opts } }).then((r) => r.data);
@@ -48,12 +52,43 @@ export const deleteBoard = (id) => api.delete(`/boards/${id}`).then((r) => r.dat
 export const getLeaderboards = (teamId) => api.get(`/teams/${teamId}/leaderboards`).then((r) => r.data);
 export const getTeamMatches = (teamId) => api.get(`/teams/${teamId}/matches`).then((r) => r.data);
 export const getPassingNetwork = (matchId) => api.get(`/matches/${matchId}/passing-network`).then((r) => r.data);
-export const getHeatmap = (matchId) => api.get(`/matches/${matchId}/heatmap`).then((r) => r.data);
+export const getHeatmap = (matchId, playerId) => api.get(`/matches/${matchId}/heatmap`, { params: { playerId } }).then((r) => r.data);
 export const getShotMap = (matchId) => api.get(`/matches/${matchId}/shot-map`).then((r) => r.data);
+
 
 // Watchlist
 export const getWatchlist = () => api.get("/watchlist").then((r) => r.data);
 export const addToWatchlist = (playerId, note) => api.post("/watchlist", { playerId, note }).then((r) => r.data);
 export const removeFromWatchlist = (playerId) => api.delete(`/watchlist/${playerId}`).then((r) => r.data);
 
+// ═══════════════════════════════════════════════════════════════════════
+// Phase 1: API-Football Core Infrastructure
+// ═══════════════════════════════════════════════════════════════════════
+export const getApiFootballLeagues = () => api.get("/football/leagues").then((r) => r.data);
+export const getStandings = (leagueId, season) =>
+  api.get(`/football/standings/${leagueId}`, { params: { season } }).then((r) => r.data);
+export const getFixtures = (leagueId, season) =>
+  api.get(`/football/fixtures/${leagueId}`, { params: { season } }).then((r) => r.data);
+export const triggerSync = () => api.post("/football/sync").then((r) => r.data);
+
+// ═══════════════════════════════════════════════════════════════════════
+// Phase 2: Visual Scraper (SofaScore / FotMob Coordinate Layer)
+// ═══════════════════════════════════════════════════════════════════════
+export const getScrapedHeatmap = (matchId, playerId) =>
+  api.post("/visuals/match-heatmap", { match_id: matchId, player_id: playerId }).then((r) => r.data);
+export const getScrapedShotmap = (matchId) =>
+  api.post("/visuals/match-shotmap", { match_id: matchId }).then((r) => r.data);
+
+// ═══════════════════════════════════════════════════════════════════════
+// Phase 3: StatsBomb Tactical Research Lab
+// ═══════════════════════════════════════════════════════════════════════
+export const getStatsBombCompetitions = () => api.get("/statsbomb/competitions").then((r) => r.data);
+export const getStatsBombMatches = (competitionId, seasonId) =>
+  api.get("/statsbomb/matches", { params: { competition_id: competitionId, season_id: seasonId } }).then((r) => r.data);
+export const getStatsBombPassingNetwork = (matchId, team) =>
+  api.post("/statsbomb/passing-network", { match_id: matchId, team }).then((r) => r.data);
+export const getStatsBombPressureMap = (matchId, team) =>
+  api.post("/statsbomb/pressure-map", { match_id: matchId, team }).then((r) => r.data);
+
 export default api;
+

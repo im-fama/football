@@ -2,6 +2,10 @@
   "name": "taqtiq-client",
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=18 <25",
+    "npm": ">=9"
+  },
   "scripts": {
     "dev": "vite",
     "dev:client": "vite",
@@ -12,7 +16,7 @@
     "@hello-pangea/dnd": "^18.0.1",
     "axios": "^1.7.7",
     "framer-motion": "^11.5.4",
-    "lucide-react": "^0.441.0",
+    "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.18.1",

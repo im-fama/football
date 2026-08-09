@@ -20,7 +20,12 @@ export function SquadProvider({ children }) {
 
   const [drawings, setDrawings] = useState([]);
   const [drawingMode, setDrawingMode] = useState(null); // 'pen' | 'laser' | 'eraser' | null
-  const [strokeColor, setStrokeColor] = useState("#4ade80");
+  const [penColor, setPenColor] = useState("#4ade80");
+  const [laserColor, setLaserColor] = useState("#f5b942");
+  const [penWidth, setPenWidth] = useState(4);
+  const [laserWidth, setLaserWidth] = useState(8);
+  const [lastDrawingTool, setLastDrawingTool] = useState("pen");
+  const [footballPosition, setFootballPosition] = useState(null); // { x: number, y: number } | null
 
   const [leagues, setLeagues] = useState([]);
   const [teams, setTeams] = useState([]);
@@ -31,6 +36,12 @@ export function SquadProvider({ children }) {
   // finishes every squad request would 404, so we gate the whole app on it.
   const [dataset, setDataset] = useState({ state: "checking", ready: false, phase: null, detail: null });
   const pollTimer = useRef(null);
+
+  useEffect(() => {
+    if (drawingMode === "pen" || drawingMode === "laser") {
+      setLastDrawingTool(drawingMode);
+    }
+  }, [drawingMode]);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,6 +71,12 @@ export function SquadProvider({ children }) {
       if (pollTimer.current) clearTimeout(pollTimer.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (drawingMode === "pen" || drawingMode === "laser") {
+      setLastDrawingTool(drawingMode);
+    }
+  }, [drawingMode]);
 
   // Fetch leagues and formations once the dataset is available
   useEffect(() => {
@@ -108,6 +125,18 @@ export function SquadProvider({ children }) {
       })
       .catch(() => setTeams([]));
   }, [selectedLeague]);
+
+  useEffect(() => {
+    if (drawingMode === "pen") {
+      setStrokeColor(penColor);
+      setStrokeWidth(penWidth);
+      setLastDrawingTool("pen");
+    } else if (drawingMode === "laser") {
+      setStrokeColor(laserColor);
+      setStrokeWidth(laserWidth);
+      setLastDrawingTool("laser");
+    }
+  }, [drawingMode, penColor, penWidth, laserColor, laserWidth]);
 
   // Load squad
   const loadSquad = useCallback(async (teamId, formationName = "4-3-3") => {
@@ -198,6 +227,40 @@ export function SquadProvider({ children }) {
     setSlots((prev) => prev.map((slot) => (slot.code === slotCode ? { ...slot, x, y } : slot)));
   };
 
+  const placeFootball = (position) => {
+    setFootballPosition(position);
+  };
+
+  const removeFootball = () => {
+    setFootballPosition(null);
+  };
+
+  const toggleFootball = () => {
+    if (footballPosition) {
+      setFootballPosition(null);
+    } else {
+      setFootballPosition({ x: 50, y: 42 });
+    }
+  };
+
+  const activeDrawingTool = drawingMode === "pen" || drawingMode === "laser" ? drawingMode : lastDrawingTool;
+  const strokeColor = activeDrawingTool === "laser" ? laserColor : penColor;
+  const strokeWidth = activeDrawingTool === "laser" ? laserWidth : penWidth;
+  const setStrokeColor = (color) => {
+    if (activeDrawingTool === "laser") {
+      setLaserColor(color);
+    } else {
+      setPenColor(color);
+    }
+  };
+  const setStrokeWidth = (width) => {
+    if (activeDrawingTool === "laser") {
+      setLaserWidth(width);
+    } else {
+      setPenWidth(width);
+    }
+  };
+
   return (
     <SquadContext.Provider
       value={{
@@ -229,8 +292,23 @@ export function SquadProvider({ children }) {
         setDrawings,
         drawingMode,
         setDrawingMode,
+        penColor,
+        setPenColor,
+        laserColor,
+        setLaserColor,
+        penWidth,
+        setPenWidth,
+        laserWidth,
+        setLaserWidth,
+        lastDrawingTool,
         strokeColor,
         setStrokeColor,
+        strokeWidth,
+        setStrokeWidth,
+        footballPosition,
+        placeFootball,
+        removeFootball,
+        toggleFootball,
         loading,
         error,
         substitute,
