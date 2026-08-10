@@ -14,7 +14,7 @@
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
     "start": "npm --prefix server start",
-    "build": "npm --prefix client install && npm --prefix client run build",
+    "build": "npm --prefix database install && npm --prefix server install && npm --prefix client install && npm --prefix client run build",
     "seed": "npm --prefix database run seed",
     "seed:kaggle": "npm --prefix database run seed:kaggle"
   },
